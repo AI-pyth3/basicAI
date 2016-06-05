@@ -1,18 +1,18 @@
 import random
 family_array=["mother","mum","father","dad","brother","brothers","sister","sisters","parent","cousin","cousins",
               "son","daughter","uncle","aunt","children","mom","grandfather","grandmother","family"]
-team_sport_array=["football","soccer","rugby","baseball","basketball","volleyball"]
-single_sports_array=["golf","tennis","ping pong"]
-feelings_array=["like","love","hate","prefer"]
-tendences_array=["google","facebook","twitter","google+","blogs","blog","youtube"]
+team_sport_array=["football","soccer","rugby","baseball","basketball","volleyball", "cricket", "hockey"]
+single_sports_array=["golf","tennis","ping pong","pool","billiards"]
+feelings_array=["like","love","hate","prefer", "angry","sad","happy","cool"]
+tendences_array=["google","facebook","twitter","google+","blogs","blog","youtube","telegram","whatsapp","hike"]
 vip_arrays=[]
 yes_answers_array=["yes","yup","yea","ja","yes i am","sure","surely"]
 no_answers_array=["no","nope","nix","nah","no i am not","negative"]
 regards_array=["hi","hello","hey","yo","sup"]
 negative_array=["isn't","don't","mustn't","not"]
-hwy_positive_answer=["not bad","fine","fine thanks","very well","i'm fine"]
-hwy_negative_answer=["so-so","not well","i have been better","really bad"]
-positive_answers=["oh ok","sweet","nice","good","hmm ok ","this is cool","cool","great"]
+hwy_positive_answer=["not bad","fine","fine thanks","very well","i'm fine","thank you","lovely","sexy","I am good","not good"]
+hwy_negative_answer=["so-so","not well","i have been better","really bad","you can't even imagine","its really bad","I am sad for you"]
+positive_answers=["oh ok","sweet","nice","good","hmm ok ","this is cool","cool","great","that seems nice","wow"]
 negative_answers=["oh yes","hmm you are right","oh understood.."," I get it..","mmh","maybe.."]
 keywords_array=[family_array,team_sport_array,single_sports_array,feelings_array,tendences_array,
                 yes_answers_array,no_answers_array,regards_array,negative_array,hwy_positive_answer,

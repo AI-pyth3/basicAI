@@ -19,7 +19,7 @@ keywords_array=[family_array,team_sport_array,single_sports_array,feelings_array
                 hwy_negative_answer]
 how_are_you_array=["how are you?","what's up?","how are you doing?","how have you been?","how's it going?"]
 
-AI_speaking="Easter >> "
+AI_speaking="Anna >> "
 sentiment=0
 def check_keywords(sentence):
     keywords=[]

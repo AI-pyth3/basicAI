@@ -1,5 +1,5 @@
 import random
-family_array=["mother","mum","father","dad","brother","brothers","sister","sisters","parent","parents","cousin","cousins",
+family_array=["mother","mum","father","dad","brother","brothers","sister","sisters","parent","cousin","cousins",
               "son","daughter","uncle","aunt","children","mom","grandfather","grandmother","family"]
 team_sport_array=["football","soccer","rugby","baseball","basketball","volleyball"]
 single_sports_array=["golf","tennis","ping pong"]

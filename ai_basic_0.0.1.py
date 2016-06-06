@@ -1,16 +1,17 @@
+from nltk.corpus import wordnet
 import random
 family_array=["mother","mum","father","dad","brother","brothers","sister","sisters","parent","cousin","cousins",
               "son","daughter","uncle","aunt","children","mom","grandfather","grandmother","family"]
 team_sport_array=["football","soccer","rugby","baseball","basketball","volleyball", "cricket", "hockey"]
 single_sports_array=["golf","tennis","ping pong","pool","billiards"]
-feelings_array=["like","love","hate","prefer", "angry","sad","happy","cool"]
+feelings_array=["like","love","hate","prefer", "angry","sad","happy","cool","bad"]
 tendences_array=["google","facebook","twitter","google+","blogs","blog","youtube","telegram","whatsapp","hike"]
 vip_arrays=[]
 yes_answers_array=["yes","yup","yea","ja","yes i am","sure","surely"]
 no_answers_array=["no","nope","nix","nah","no i am not","negative"]
 regards_array=["hi","hello","hey","yo","sup"]
 negative_array=["isn't","don't","mustn't","not"]
-hwy_positive_answer=["not bad","fine","fine thanks","very well","i'm fine","thank you","lovely","sexy","I am good","not good"]
+hwy_positive_answer=["not bad","fine","fine thanks","very well","i'm fine","thank you","lovely","sexy","I am good","not good","good"]
 hwy_negative_answer=["so-so","not well","i have been better","really bad","you can't even imagine","its really bad","I am sad for you"]
 positive_answers=["oh ok","sweet","nice","good","hmm ok ","this is cool","cool","great","that seems nice","wow"]
 negative_answers=["oh yes","hmm you are right","oh understood.."," I get it..","mmh","maybe.."]
@@ -46,13 +47,13 @@ def output_keywords(keywords):
             print(AI_speaking,"Tell me something you like for example ")
         elif w in hwy_negative_answer:
             print("Come'on everythings will be good!")
-            print(AI_speaking,"Tell me something you like for example ")
+            print(AI_speaking,"Tell me something new ")
             
         elif w in negative_array:
             sentiment=-1
             for k in keywords:
                 if k in feelings_array:
-                    if k=="hate":
+                    if k=="hate" or k=="bad":
                         sentiment=1
                     else:
                         sentiment=-1
@@ -70,11 +71,13 @@ def output_keywords(keywords):
                 print(AI_speaking,random.choice(positive_answers))
             elif sentiment==-1:
                 print(AI_speaking,random.choice(negative_answers))
-    else:
+    elif w in vip_array:
         if sentiment==1:
             print(AI_speaking,random.choice(positive_answers))
         elif sentiment==-1:
             print(AI_speaking,random.choice(negative_answers))
+    else:
+        core = 0
             
 def general_array_output(kw,sentiment):
     word=""
@@ -100,20 +103,29 @@ def general_array_output(kw,sentiment):
                 print(AI_speaking,(random.choice(tendence_questions)%w))
             else:
                 print(AI_speaking,random.choice(negative_tendences_questions))
-
         
                 
                 
             
 
-print(AI_speaking,"Hi I'm Easter, a virtual AI. You can talk with me for example if you don't know what to do..")
+print(AI_speaking,"Hi I'm Anna, a virtual AI. You can talk with me for example if you don't know what to do..")
 print(AI_speaking,"But first of all I need to know your name..")
-user_name=input("So what's your name? ")
+user_name=input("So what's your name? : ")
 user_speaking=user_name+" >> "
 print(AI_speaking,random.choice(regards_array)," ",user_name)
+core = 1
 while True:
-    sent=input(user_speaking).lower()
-    input_keywords=check_keywords(sent)
-    output_keywords(input_keywords)
-    
-    
+	if core == 0 :
+		print(AI_speaking," should I make a search for it?? cause I do not understand this :( ")
+		check=input(user_speaking).lower()
+		if check == "yes":
+			synsets = wordnet.synsets( sent )
+			print("Name:", synset.name)
+			print("Lexical Type:", synset.lexname)
+			print("Lemmas:", synset.lemma_names)
+			print("Definition:", synset.definition)
+		print(AI_speaking,"Hope you got the answer")
+	else:
+		input_keywords=check_keywords(sent)
+		output_keywords(input_keywords)
+		core = 1

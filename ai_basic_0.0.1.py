@@ -1,5 +1,6 @@
 from nltk.corpus import wordnet
 import random
+global core
 family_array=["mother","mum","father","dad","brother","brothers","sister","sisters","parent","cousin","cousins",
               "son","daughter","uncle","aunt","children","mom","grandfather","grandmother","family"]
 team_sport_array=["football","soccer","rugby","baseball","basketball","volleyball", "cricket", "hockey"]
@@ -37,7 +38,8 @@ def check_keywords(sentence):
     return keywords
 
 def output_keywords(keywords):
-    global sentiment
+
+    global sentiment, core
     if (len(keywords)!=0):
         w=keywords[0]
         if w in regards_array:
@@ -71,13 +73,15 @@ def output_keywords(keywords):
                 print(AI_speaking,random.choice(positive_answers))
             elif sentiment==-1:
                 print(AI_speaking,random.choice(negative_answers))
-    elif w in vip_array:
-        if sentiment==1:
-            print(AI_speaking,random.choice(positive_answers))
-        elif sentiment==-1:
-            print(AI_speaking,random.choice(negative_answers))
+       # elif w in vip_array:
+        #    if sentiment==1:
+         #       print(AI_speaking,random.choice(positive_answers))
+          #  elif sentiment==-1:
+             #   print(AI_speaking,random.choice(negative_answers))
     else:
+
         core = 0
+ 
             
 def general_array_output(kw,sentiment):
     word=""
@@ -113,19 +117,26 @@ print(AI_speaking,"But first of all I need to know your name..")
 user_name=input("So what's your name? : ")
 user_speaking=user_name+" >> "
 print(AI_speaking,random.choice(regards_array)," ",user_name)
-core = 1
+core=1
+
 while True:
-	if core == 0 :
-		print(AI_speaking," should I make a search for it?? cause I do not understand this :( ")
-		check=input(user_speaking).lower()
-		if check == "yes":
-			synsets = wordnet.synsets( sent )
-			print("Name:", synset.name)
-			print("Lexical Type:", synset.lexname)
-			print("Lemmas:", synset.lemma_names)
-			print("Definition:", synset.definition)
-		print(AI_speaking,"Hope you got the answer")
-	else:
-		input_keywords=check_keywords(sent)
-		output_keywords(input_keywords)
-		core = 1
+
+    if (core == 0):
+        print(AI_speaking," should I make a search for it?? cause I do not understand this :( ")
+        check=input(user_speaking).lower()
+        if check == "yes":
+            synset = wordnet.synsets( sent )
+            print("Name:", synset[0].name())
+            print("Lexical Type:", synset[0].lexname())
+            print("Lemmas:", synset[0].lemma_names())
+            print("Definition:", synset[0].definition())
+        print(AI_speaking,"Hope you got the answer")
+        core=1
+    else:
+        sent=input(user_speaking).lower()
+        input_keywords=check_keywords(sent)
+        output_keywords(input_keywords)
+
+	
+    
+            

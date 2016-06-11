@@ -1,0 +1,230 @@
+from nltk.corpus import wordnet
+import random
+global core
+file=open('keywords.txt','r')
+keywords_dict=eval(file.readline())
+file.close()
+
+
+
+how_are_you_array=["how are you?","what's up?","how are you doing?","how have you been?","how's it going?"]
+
+AI_speaking="Anna >> "
+sentiment=0
+def check_keywords(sentence):
+    keywords=[]
+    for ch in ["?","!",".",","]:
+        if ch in ["?","!",".",","]:
+           sentence=sentence.replace(ch," ")
+    words=sentence.split()
+
+    for w in words:
+        for array in list(keywords_dict.keys()):
+            if w in keywords_dict.get(array):
+                keywords.append(w)
+                break
+
+    return keywords
+
+def output_keywords(keywords):
+    
+    global sentiment, core
+    if (len(keywords)!=0):
+        w=keywords[0]
+        if w in keywords_dict.get("regards"):
+            print(AI_speaking,random.choice(how_are_you_array))
+        elif w in keywords_dict.get("hwy positive"):
+            print(AI_speaking,"This is cool!")
+            print(AI_speaking,"Tell me something you like for example ")
+        elif w in keywords_dict.get("hwy negative"):
+            print("Come'on everythings will be good!")
+            print(AI_speaking,"Tell me something new ")
+            
+        elif w in keywords_dict.get("negative"):
+            sentiment=-1
+            for k in keywords:
+                if k in keywords_dict.get("feelings"):
+                    if k=="hate" or k=="bad":
+                        sentiment=1
+                    else:
+                        sentiment=-1
+            general_array_output(keywords,sentiment)
+           
+        elif w in keywords_dict.get("feelings"):
+            if w!="hate":
+                sentiment=1
+               
+            else:
+                sentiment=-1
+            general_array_output(keywords,sentiment)
+        else:
+            if sentiment==1:
+                print(AI_speaking,random.choice(positive_answers))
+            elif sentiment==-1:
+                print(AI_speaking,random.choice(negative_answers))
+       # elif w in vip_array:
+        #    if sentiment==1:
+         #       print(AI_speaking,random.choice(positive_answers))
+          #  elif sentiment==-1:
+             #   print(AI_speaking,random.choice(negative_answers))
+    else:
+
+        core = 0
+ 
+            
+def general_array_output(kw,sentiment):
+    global user_speaking
+    found=False
+    file=open("questions.txt","r")
+    questions_dict=eval(file.read())
+    file.close()
+    word=""
+ 
+    for w in kw:
+        if w in keywords_dict.get('team sports'):
+            if sentiment==1:
+                questions=questions_dict.get('team sports')
+                key_question=random.choice(list(questions.keys()))
+                array_kq=questions.get(key_question)
+                
+                if array_kq[0]==0:
+                    print(AI_speaking,(key_question %w))
+                    answer=input(user_speaking).lower()
+                    questions_dict['team sports'][key_question].append({w:answer})
+                    array_kq[0]=1
+                    
+                    
+                    print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
+                
+                elif array_kq[0]==1:
+                    for saved_ans in array_kq:
+                        if (type(saved_ans)==dict):
+                            sport=list(saved_ans.keys())
+                            
+                            if sport[0]==w:
+                                print(AI_speaking,"I know, I asked you'",(key_question %w),"' and you said '",saved_ans.get(sport[0]),"'")
+                                found=True
+                                break
+                    
+                    if found==False:
+                        print(AI_speaking,(key_question %w))
+                        answer=input(user_speaking).lower()
+                        questions_dict['team sports'][key_question].append({w:answer})
+                        array_kq[0]=1
+                        pos=keywords_dict.get('positive answers')
+                        
+                        print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
+                        print(questions_dict)
+                else:
+                    print(AI_speaking,(key_question %w))
+                    answer=input(user_speaking).lower()
+                    print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
+                    
+                
+            else:
+               # print(AI_speaking,random.choice(negative_sport_questions))
+                questions=questions_dict.get('negative sports')
+                key_question=random.choice(list(questions.keys()))
+                print(AI_speaking,(key_question))
+                answer=input(user_speaking).lower()
+                print(AI_speaking,(random.choice(keywords_dict.get('negative answers'))))
+
+                
+        if w in keywords_dict.get('single sports'):
+            if sentiment==1:
+                questions=questions_dict.get('single sports')
+                key_question=random.choice(list(questions.keys()))
+                array_kq=questions.get(key_question)
+                
+                if array_kq[0]==0:
+                    print(AI_speaking,(key_question %w))
+                    answer=input(user_speaking).lower()
+                    questions_dict['single sports'][key_question].append({w:answer})
+                    array_kq[0]=1
+                    
+                    
+                    print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
+                
+                elif array_kq[0]==1:
+                    for saved_ans in array_kq:
+                        if (type(saved_ans)==dict):
+                            sport=list(saved_ans.keys())
+                            
+                            if sport[0]==w:
+                                print(AI_speaking,"I know, I asked you'",(key_question %w),"' and you said '",saved_ans.get(sport[0]),"'")
+                                found=True
+                                break
+                    
+                    if found==False:
+                        print(AI_speaking,(key_question %w))
+                        answer=input(user_speaking).lower()
+                        questions_dict['team sports'][key_question].append({w:answer})
+                        array_kq[0]=1
+                        pos=keywords_dict.get('positive answers')
+                        
+                        print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
+                        print(questions_dict)
+                else:
+                    print(AI_speaking,(key_question %w))
+                    answer=input(user_speaking).lower()
+                    print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
+
+            else:
+                questions=questions_dict.get('negative sports')
+                key_question=random.choice(list(questions.keys()))
+                print(AI_speaking,(key_question))
+                answer=input(user_speaking).lower()
+                print(AI_speaking,(random.choice(keywords_dict.get('negative answers'))))
+                
+        if w in keywords_dict.get('tendences'):
+            if sentiment==1:
+                questions=questions_dict.get('tendences')
+                key_question=random.choice(list(questions.keys()))
+                array_kq=questions.get(key_question)
+               # print(AI_speaking,(random.choice(tendence_questions)%w))
+                print(AI_speaking,(key_question %w))
+                answer=input(user_speaking).lower()
+                print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
+            else:
+               # print(AI_speaking,random.choice(negative_tendences_questions))
+               questions=questions_dict.get('negative tendences')
+               key_question=random.choice(list(questions.keys()))
+               print(AI_speaking,(key_question))
+               answer=input(user_speaking).lower()
+               print(AI_speaking,(random.choice(keywords_dict.get('negative answers'))))
+        
+                
+    file=open("questions.txt","w")
+    file.write(str(questions_dict))
+    file.close()
+                        
+            
+
+print(AI_speaking,"Hi I'm Anna, a virtual AI. You can talk with me for example if you don't know what to do..")
+print(AI_speaking,"But first of all I need to know your name..")
+user_name=input("So what's your name? : ")
+user_speaking=user_name+" >> "
+print(AI_speaking,random.choice(keywords_dict.get('regards'))," ",user_name)
+core=1
+
+while True:
+
+    if (core == 0):
+        print(AI_speaking," should I make a search for it?? cause I do not understand this :( ")
+        check=input(user_speaking).lower()
+        if check == "yes":
+            synset = wordnet.synsets( sent )
+            print("Name:", synset[0].name())
+            print("Lexical Type:", synset[0].lexname())
+            print("Lemmas:", synset[0].lemma_names())
+            print("Definition:", synset[0].definition())
+        print(AI_speaking,"Hope you got the answer")
+        core=1
+    else:
+        sent=input(user_speaking).lower()
+        input_keywords=check_keywords(sent)
+        output_keywords(input_keywords)
+
+	
+    
+            

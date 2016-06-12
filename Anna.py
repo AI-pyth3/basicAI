@@ -237,8 +237,9 @@ core=1
 while True:
 
     if (core == 0):
-        print(AI_speaking," should I make a search for it?? cause I do not understand this :( ")
-        check=input(user_speaking).lower()
+#        print(AI_speaking," should I make a search for it?? cause I do not understand this :( ")
+#        check=input(user_speaking).lower()
+        check = "yes"
         if check == "yes":
           if network == 0:
             synset = wordnet.synsets( sent )
@@ -251,14 +252,27 @@ while True:
             words = sent.split()
             countin = len(sent.split())
             if countin == 1:
+              print ("\n")
               print (wikipedia.summary(sent))
             else:
+              sent += " fixforsearch"
+              search = 0
+              words = sent.split()
+              countin = len(sent.split())
               for i in range(0, countin):
                  if (words[i] == "search"):
+                    search = 1
                     break
                  count = count + 1
-              newword = words[count + 1]
-              print (wikipedia.summary(newword))
+              if (search == 1) and (words[count + 1] != "fixforsearch"):
+                newword = words[count + 1]
+                print ("\n")
+                print (wikipedia.summary(newword))
+              else:
+                print(AI_speaking,"OK, but what should I search?")
+                newword = input(user_speaking)
+                print ("\n")
+                print (wikipedia.summary(newword))
         print("\n\n",AI_speaking,"Hope you got the answer")
         core=1
     else:

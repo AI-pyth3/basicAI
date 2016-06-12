@@ -2,13 +2,37 @@
 #AI_name = Anna
 
 from nltk.corpus import wordnet
+
 import random
-global core
+import socket
+import wikipedia
+
+global core, network
+
+REMOTE_SERVER = "www.google.com"
+
 file=open('keywords.txt','r')
 keywords_dict=eval(file.readline())
 file.close()
 
-
+#check if we have internet connection
+def is_connected():
+  global network
+  try:
+    # see if we can resolve the host name -- tells us if there is
+    # a DNS listening
+    host = socket.gethostbyname(REMOTE_SERVER)
+    # connect to the host -- tells us if the host is actually
+    # reachable
+    s = socket.create_connection((host, 80), 2)
+    network = 1
+    return True
+  except:
+     pass
+     network = 0
+  return False
+is_connected()
+#end it
 
 how_are_you_array=["how are you?","what's up?","how are you doing?","how have you been?","how's it going?"]
 
@@ -216,12 +240,15 @@ while True:
         print(AI_speaking," should I make a search for it?? cause I do not understand this :( ")
         check=input(user_speaking).lower()
         if check == "yes":
+          if network == 0:
             synset = wordnet.synsets( sent )
             print("Name:", synset[0].name())
             print("Lexical Type:", synset[0].lexname())
             print("Lemmas:", synset[0].lemma_names())
             print("Definition:", synset[0].definition())
-        print(AI_speaking,"Hope you got the answer")
+          else:
+            print (wikipedia.summary(sent))
+        print("\n\n",AI_speaking,"Hope you got the answer")
         core=1
     else:
         sent=input(user_speaking).lower()

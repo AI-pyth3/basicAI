@@ -1,4 +1,4 @@
-#AI_version = 0.0.3
+#AI_version = 0.0.4
 #AI_name = Anna
 
 from nltk.corpus import wordnet
@@ -247,7 +247,18 @@ while True:
             print("Lemmas:", synset[0].lemma_names())
             print("Definition:", synset[0].definition())
           else:
-            print (wikipedia.summary(sent))
+            count = 0
+            words = sent.split()
+            countin = len(sent.split())
+            if countin == 1:
+              print (wikipedia.summary(sent))
+            else:
+              for i in range(0, countin):
+                 if (words[i] == "search"):
+                    break
+                 count = count + 1
+              newword = words[count + 1]
+              print (wikipedia.summary(newword))
         print("\n\n",AI_speaking,"Hope you got the answer")
         core=1
     else:

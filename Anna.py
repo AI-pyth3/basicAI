@@ -1,3 +1,6 @@
+#AI_version = 0.0.3
+#AI_name = Anna
+
 from nltk.corpus import wordnet
 import random
 global core

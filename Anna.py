@@ -7,7 +7,7 @@ import random
 import socket
 import wikipedia
 
-global core, network
+global core, network, sent
 
 REMOTE_SERVER = "www.google.com"
 
@@ -33,6 +33,38 @@ def is_connected():
   return False
 is_connected()
 #end it
+
+#proper search function
+def function_wiki_search(sent):
+    count = 0
+    countin = len(sent.split())
+    if countin == 1:
+      print ("\n")
+      print (wikipedia.summary(sent))
+    else:
+      sent += " fixforsearch"
+      search = 0
+      words = sent.split()
+      countin = len(sent.split())
+      for i in range(0, countin):
+        if (words[i] == "search"):
+          search = 1
+          break
+        count = count + 1
+      if (search == 1) and (words[count + 1] != "fixforsearch"):
+        newword = words[count + 1]
+        print ("\n")
+        print (wikipedia.summary(newword))
+      elif (search == 1):
+        print(AI_speaking,"OK, but what should I search?")
+        newword = input(user_speaking)
+        print ("\n")
+        print (wikipedia.summary(newword))
+      else:
+        return;
+      print("\n\n",AI_speaking,"Hope you got the answer")
+    return;
+#end
 
 how_are_you_array=["how are you?","what's up?","how are you doing?","how have you been?","how's it going?"]
 
@@ -247,33 +279,9 @@ while True:
             print("Lexical Type:", synset[0].lexname())
             print("Lemmas:", synset[0].lemma_names())
             print("Definition:", synset[0].definition())
+            print("\n\n",AI_speaking,"Hope you got the answer")
           else:
-            count = 0
-            words = sent.split()
-            countin = len(sent.split())
-            if countin == 1:
-              print ("\n")
-              print (wikipedia.summary(sent))
-            else:
-              sent += " fixforsearch"
-              search = 0
-              words = sent.split()
-              countin = len(sent.split())
-              for i in range(0, countin):
-                 if (words[i] == "search"):
-                    search = 1
-                    break
-                 count = count + 1
-              if (search == 1) and (words[count + 1] != "fixforsearch"):
-                newword = words[count + 1]
-                print ("\n")
-                print (wikipedia.summary(newword))
-              else:
-                print(AI_speaking,"OK, but what should I search?")
-                newword = input(user_speaking)
-                print ("\n")
-                print (wikipedia.summary(newword))
-        print("\n\n",AI_speaking,"Hope you got the answer")
+            function_wiki_search(sent)
         core=1
     else:
         sent=input(user_speaking).lower()

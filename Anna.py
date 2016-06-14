@@ -1,21 +1,42 @@
-#AI_version = 0.0.4
+#=========================================================================================
+#AI_version = 0.0.5
 #AI_name = Anna
+#=========================================================================================
 
+
+#=========================================================================================
 from nltk.corpus import wordnet
+from textblob import TextBlob
+#=========================================================================================
 
+
+#=========================================================================================
 import random
 import socket
 import wikipedia
+#=========================================================================================
 
-global core, network, sent
 
+#=========================================================================================
+global core, network, sent, is_question, is_wiki_search
+#=========================================================================================
+
+
+#=========================================================================================
 REMOTE_SERVER = "www.google.com"
+#=========================================================================================
 
+
+#=========================================================================================
 file=open('keywords.txt','r')
 keywords_dict=eval(file.readline())
 file.close()
+#=========================================================================================
 
+
+#=========================================================================================
 #check if we have internet connection
+#=========================================================================================
 def is_connected():
   global network
   try:
@@ -32,44 +53,124 @@ def is_connected():
      network = 0
   return False
 is_connected()
+#======================================================================================
 #end it
+#=====================================================================================
 
-#proper search function
-def function_wiki_search(sent):
-    count = 0
-    countin = len(sent.split())
-    if countin == 1:
-      print ("\n")
-      print (wikipedia.summary(sent))
-    else:
-      sent += " fixforsearch"
-      search = 0
-      words = sent.split()
-      countin = len(sent.split())
-      for i in range(0, countin):
-        if (words[i] == "search"):
-          search = 1
-          break
-        count = count + 1
-      if (search == 1) and (words[count + 1] != "fixforsearch"):
-        newword = words[count + 1]
-        print ("\n")
-        print (wikipedia.summary(newword))
-      elif (search == 1):
-        print(AI_speaking,"OK, but what should I search?")
-        newword = input(user_speaking)
-        print ("\n")
-        print (wikipedia.summary(newword))
-      else:
-        return;
-      print("\n\n",AI_speaking,"Hope you got the answer")
+
+#=====================================================================================
+#function for synset
+#======================================================================================
+def dict_synset(sent):
+    synset = wordnet.synsets( sent )
+    print("Name:", synset[0].name())
+    print("Lexical Type:", synset[0].lexname())
+    print("Lemmas:", synset[0].lemma_names())
+    print("Definition:", synset[0].definition())
+    print("\n\n",AI_speaking,"Hope you got the answer")
     return;
+#=======================================================================================
+#end it
+#=======================================================================================
+
+
+#=======================================================================================
+#search check function
+#=======================================================================================
+def check_wiki_search(sent):
+    global is_wiki_search
+    is_wiki_search = 0
+    words = sent.split()
+    countin = len(sent.split())
+    for i in range(0, countin):
+      if (words[i] == "search"):
+        is_wiki_search = 1
+        break
+    return;
+#========================================================================================
+#========================================================================================
+
+
+#========================================================================================
+#wikipedia search function
+#========================================================================================
+def make_wiki_search(sent):
+    sent += " fixforsearch"
+    search = 0
+    count = 0
+    words = sent.split()
+    countin = len(sent.split())
+    for i in range(0, countin):
+      if (words[i] == "search") or (words[i] == "search?"):
+        search = 1
+        break
+      count = count + 1
+    if (search == 1) and (words[count + 1] != "fixforsearch"):
+      newword = words[count + 1]
+      print ("\n")
+      print (wikipedia.summary(newword))
+    elif (search == 1):
+      print("OK, but what should I search?")
+      newword = input(user_speaking)
+      print ("\n")
+      print (wikipedia.summary(newword))
+    else:
+      return;
+    print("\n\n",AI_speaking,"Hope you got the answer")
+    return;
+#=========================================================================================
 #end
+#=========================================================================================
+
+
+#=========================================================================================
+#function to detect questions
+#=========================================================================================
+def questions(sent):
+    global is_question
+    kind_of_verbs=["VB","VBZ","VBP","VBD","MD"]
+    wh_starts=["WRB","WP","WDT"]
+    sent=TextBlob(sent)
+    if "?" in sent:
+      is_question = 1
+      return;
+    else:
+      tag=sent.tags
+    if tag[0][1]in kind_of_verbs:
+      is_question = 1
+      return;
+    elif tag[0][1]in wh_starts:
+      is_question = 1
+      return;
+    else:
+      is_question = 0
+      return;
+    return;
+#===========================================================================================
+#end
+#===========================================================================================
+
+
+#===========================================================================================
+#reply to questions function
+#===========================================================================================
+def reply_question():
+    print ("fixme add random reply blobs here")
+    return;
+#===========================================================================================
+
+
+#============================================================================================
 
 how_are_you_array=["how are you?","what's up?","how are you doing?","how have you been?","how's it going?"]
 
 AI_speaking="Anna >> "
 sentiment=0
+
+#===========================================================================================
+
+
+#===========================================================================================
 def check_keywords(sentence):
     keywords=[]
     for ch in ["?","!",".",","]:
@@ -84,7 +185,10 @@ def check_keywords(sentence):
                 break
 
     return keywords
+#===========================================================================================
 
+
+#===========================================================================================
 def output_keywords(keywords):
     
     global sentiment, core
@@ -129,8 +233,10 @@ def output_keywords(keywords):
     else:
 
         core = 0
+#===========================================================================================
+
  
-            
+#===========================================================================================            
 def general_array_output(kw,sentiment):
     global user_speaking
     found=False
@@ -256,9 +362,10 @@ def general_array_output(kw,sentiment):
     file=open("questions.txt","w")
     file.write(str(questions_dict))
     file.close()
-                        
-            
+#===========================================================================================                        
 
+
+#===========================================================================================
 print(AI_speaking,"Hi I'm Anna, a virtual AI. You can talk with me for example if you don't know what to do..")
 print(AI_speaking,"But first of all I need to know your name..")
 user_name=input("So what's your name? : ")
@@ -274,20 +381,21 @@ while True:
         check = "yes"
         if check == "yes":
           if network == 0:
-            synset = wordnet.synsets( sent )
-            print("Name:", synset[0].name())
-            print("Lexical Type:", synset[0].lexname())
-            print("Lemmas:", synset[0].lemma_names())
-            print("Definition:", synset[0].definition())
-            print("\n\n",AI_speaking,"Hope you got the answer")
+            dict_synset(sent)
           else:
-            function_wiki_search(sent)
+            check_wiki_search(sent)
+            questions(sent)
+            if (is_wiki_search == 1):
+               make_wiki_search(sent)
+            elif (is_question == 1):
+               reply_question()
+            else:
+               print (AI_speaking, "cool")
         core=1
     else:
         sent=input(user_speaking).lower()
         input_keywords=check_keywords(sent)
         output_keywords(input_keywords)
 
-	
-    
-            
+#=============================================================================================
+#=============================================================================================

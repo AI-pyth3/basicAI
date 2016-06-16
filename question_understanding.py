@@ -9,7 +9,7 @@ else:
     tag=sent.tags
     if tag[0][1]in kind_of_verbs:
         print("This is a question")
-    if tag[0][1]in wh_starts:
+    elif tag[0][1]in wh_starts:
         print("This is a question")
     else:
         print("This is not a question")

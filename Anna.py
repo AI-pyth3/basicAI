@@ -7,6 +7,9 @@
 #=========================================================================================
 from nltk.corpus import wordnet
 from textblob import TextBlob
+from bs4 import BeautifulSoup
+from urllib.request import Request
+from pws import Bing
 #=========================================================================================
 
 
@@ -14,11 +17,14 @@ from textblob import TextBlob
 import random
 import socket
 import wikipedia
+import urllib.request
+import webbrowser
 #=========================================================================================
 
 
 #=========================================================================================
 global core, network, sent, is_question, is_wiki_search
+AI_speaking="Anna >> "
 #=========================================================================================
 
 
@@ -30,6 +36,14 @@ REMOTE_SERVER = "www.google.com"
 #=========================================================================================
 file=open('keywords.txt','r')
 keywords_dict=eval(file.readline())
+file.close()
+
+file=open('answer_to_question.txt','r')
+answer_to_question_dict=eval(file.readline())
+file.close()
+
+file=open('answer_to_question_nokw.txt','r')
+answer_tq_nokw_dict=eval(file.readline())
 file.close()
 #=========================================================================================
 
@@ -52,6 +66,7 @@ def is_connected():
      pass
      network = 0
   return False
+
 is_connected()
 #======================================================================================
 #end it
@@ -69,6 +84,96 @@ def dict_synset(sent):
     print("Definition:", synset[0].definition())
     print("\n\n",AI_speaking,"Hope you got the answer")
     return;
+#=======================================================================================
+#end it
+#=======================================================================================
+
+#=======================================================================================
+#bing search function
+#=======================================================================================
+def bing_search(srch):
+    result=Bing.search(srch,3,0,country_code="gb")
+    code=0
+    for r in result.get('results'):
+        print("\n\n")
+        print("Title: ",r.get('link_text'))
+        print("Description: ",r.get('link_info'))
+        print("Link: ",r.get('link'))
+        print("Code: ",code+1)
+        print("\n\n")
+        
+        code+=1
+        
+    print(AI_speaking,"Do you want to open one of the previuos link?")
+    openit=input().lower()
+    if (openit=="yes"):
+        ch_output=AI_speaking+"Tell me the code of the link you want to open :) "
+        ch_code=input(ch_output)
+        ch_code=int(ch_code)
+        if (1<=ch_code<=3):
+            results=result.get('results')
+            link_to_open=results[ch_code-1].get('link')
+            webbrowser.open_new(link_to_open)
+#=======================================================================================
+#end it
+#=======================================================================================
+def capital_of(srch):
+    srch=srch+" capital of"
+    result=Bing.search(srch,1,0,country_code="gb")
+   
+    results=result.get('results')
+    
+    req = Request(results[0].get('link'),headers={'User-Agent': 'Mozilla/5.0'})
+    stringa = urllib.request.urlopen(req).read(100000)
+    code=0
+
+    soup = BeautifulSoup(stringa,"lxml")
+    
+    table=soup.find_all('td')
+    for tab in table:
+
+        if ('<td class="main">' in str(tab)):
+            starts_at=(str(tab)).find('<p>')+3
+            ends_at=(str(tab)).find('</p>')
+            capital=(str(tab)[starts_at:ends_at]).replace("<strong>"," ").replace("</strong>"," ")
+            
+            code=1
+            
+        else:
+            pass
+    print(AI_speaking,capital)
+#=======================================================================================
+#a semplified bing search function for questions
+#=======================================================================================
+def bing_search_questions(srch):
+    if 'who' in srch:
+        srch=srch+'wikipedia'
+    pos=0
+    result=Bing.search(srch,1,0,country_code="gb")
+   
+    results=result.get('results')
+    
+    req = Request(results[0].get('link'),headers={'User-Agent': 'Mozilla/5.0'})
+    stringa = urllib.request.urlopen(req).read(100000)
+
+
+    soup = BeautifulSoup(stringa,"lxml")
+    new = soup.find_all('p')
+    table=soup.find_all('td')
+    for tab in table:
+        if new[pos] in tab:
+           
+            pos=pos+1
+    try:
+        ln=len(new[pos].getText())
+        if (ln<30):
+            print(AI_speaking,new[pos].getText().replace('\n',' '))
+            print(AI_speaking,new[pos+1].getText().replace('\n',' '))
+        else:
+            print(new[pos].getText())
+    except IndexError:
+            print(AI_speaking,"I have found nothing")
+    
 #=======================================================================================
 #end it
 #=======================================================================================
@@ -151,11 +256,79 @@ def questions(sent):
 #===========================================================================================
 
 
+
 #===========================================================================================
 #reply to questions function
 #===========================================================================================
-def reply_question():
-    print ("fixme add random reply blobs here")
+def reply_question(sent):
+    like_general_answers=["I'm not interested in it","I don't know a lot about it","Idk it"]
+    status=0
+    wh_starts=["WRB","WP","WDT"]
+    
+    
+    if '?' in sent:
+        sent=sent.replace('?',' ')
+        
+        
+
+    keywords_question=check_keywords(sent)
+    if status==0:
+        if 'capital' in sent:
+            capital_of(sent)
+            status=1
+    if status==0:
+        for keyword in keywords_question:
+            if keyword in keywords_dict.get("feelings") or "think about" in sent:
+                answerkw_list=list(answer_to_question_dict.keys())
+                for keyword in keywords_question:
+                    if keyword in answerkw_list:
+                        print(AI_speaking,random.choice(answer_to_question_dict.get(keyword)))
+                        status=1
+                        break
+                
+                break
+            
+    if status==0:
+        for keyword in ["god","prayer","pray"]:
+            if keyword in sent:
+                print(AI_speaking,random.choice(answer_tq_nokw_dict.get('about God')))
+                status=1
+                break
+            
+    if status==0:
+        for keyword in keywords_dict.get('family'):
+            if keyword in sent:
+                print(AI_speaking,random.choice(answer_tq_nokw_dict.get('about family')))
+                status=1
+                break
+
+    if status==0:
+        for keyword in ['music','song','singer','band']:
+            if keyword in sent:
+                print(AI_speaking,random.choice(answer_tq_nokw_dict.get('about music')))
+                status=1
+                break
+
+    if status==0:
+        for keyword in keywords_question:
+            if keyword in keywords_dict.get("feelings") or "think about" in sent:
+                print(AI_speaking,random.choice(like_general_answers))
+                status=1
+                break
+            
+    if status==0:
+        tbsent=TextBlob(sent)
+        tag=tbsent.tags
+        if tag[0][1]in wh_starts and 'you' not in sent:
+            bing_search_questions(sent)
+            status=1
+            
+        
+                
+              
+                    
+      
+    
     return;
 #===========================================================================================
 
@@ -164,7 +337,7 @@ def reply_question():
 
 how_are_you_array=["how are you?","what's up?","how are you doing?","how have you been?","how's it going?"]
 
-AI_speaking="Anna >> "
+
 sentiment=0
 
 #===========================================================================================
@@ -388,14 +561,18 @@ while True:
             if (is_wiki_search == 1):
                make_wiki_search(sent)
             elif (is_question == 1):
-               reply_question()
+               reply_question(sent)
             else:
                print (AI_speaking, "cool")
         core=1
     else:
         sent=input(user_speaking).lower()
-        input_keywords=check_keywords(sent)
-        output_keywords(input_keywords)
+        questions(sent)
+        if (is_question == 1):
+          reply_question(sent)
+        else:
+          input_keywords=check_keywords(sent)
+          output_keywords(input_keywords)
 
 #=============================================================================================
 #=============================================================================================

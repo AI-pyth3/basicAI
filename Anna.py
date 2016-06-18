@@ -146,18 +146,26 @@ def capital_of(srch):
 #a semplified bing search function for questions
 #=======================================================================================
 def bing_search_questions(srch):
-    if 'who' in srch:
+    if 'who' in srch or 'where' in srch or 'what' in srch:
         srch=srch+'wikipedia'
     pos=0
     result=Bing.search(srch,1,0,country_code="gb")
    
     results=result.get('results')
+    link=results[0].get('link')
     
     req = Request(results[0].get('link'),headers={'User-Agent': 'Mozilla/5.0'})
     stringa = urllib.request.urlopen(req).read(100000)
-
-
     soup = BeautifulSoup(stringa,"lxml")
+    if('wikipedia' in link):
+        txt=soup.find('div',id="bodyContent")
+        
+        print (AI_speaking, txt.find('p').getText())
+        return
+
+   
+        
+    
     new = soup.find_all('p')
     table=soup.find_all('td')
     for tab in table:
@@ -276,6 +284,33 @@ def reply_question(sent):
         if 'capital' in sent:
             capital_of(sent)
             status=1
+            
+    
+            
+    if status==0:
+        if ('you' in sent or 'your' in sent):
+            for keyword in ["god","prayer","pray"]:
+                if keyword in sent:
+                    print(AI_speaking,random.choice(answer_tq_nokw_dict.get('about God')))
+                    status=1
+                    break
+            
+    if status==0:
+        if ('you' in sent or 'your' in sent):
+            for keyword in keywords_dict.get('family') :
+                if keyword in sent:
+                    print(AI_speaking,random.choice(answer_tq_nokw_dict.get('about family')))
+                    status=1
+                    break
+
+    if status==0:
+        if ('you' in sent or 'your' in sent):
+            for keyword in ['music','song','singer','band']:
+                if keyword in sent:
+                    print(AI_speaking,random.choice(answer_tq_nokw_dict.get('about music')))
+                    status=1
+                    break
+
     if status==0:
         for keyword in keywords_question:
             if keyword in keywords_dict.get("feelings") or "think about" in sent:
@@ -287,27 +322,7 @@ def reply_question(sent):
                         break
                 
                 break
-            
-    if status==0:
-        for keyword in ["god","prayer","pray"]:
-            if keyword in sent:
-                print(AI_speaking,random.choice(answer_tq_nokw_dict.get('about God')))
-                status=1
-                break
-            
-    if status==0:
-        for keyword in keywords_dict.get('family'):
-            if keyword in sent:
-                print(AI_speaking,random.choice(answer_tq_nokw_dict.get('about family')))
-                status=1
-                break
-
-    if status==0:
-        for keyword in ['music','song','singer','band']:
-            if keyword in sent:
-                print(AI_speaking,random.choice(answer_tq_nokw_dict.get('about music')))
-                status=1
-                break
+    
 
     if status==0:
         for keyword in keywords_question:
@@ -319,9 +334,12 @@ def reply_question(sent):
     if status==0:
         tbsent=TextBlob(sent)
         tag=tbsent.tags
-        if tag[0][1]in wh_starts and 'you' not in sent:
+       
+        if (tag[0][1] in wh_starts and 'you' not in sent):
+            print("d")
             bing_search_questions(sent)
             status=1
+ 
             
         
                 

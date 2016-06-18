@@ -45,6 +45,14 @@ file.close()
 file=open('answer_to_question_nokw.txt','r')
 answer_tq_nokw_dict=eval(file.readline())
 file.close()
+
+file=open('queslist.txt','r')
+general_questions=eval(file.readline())
+file.close()
+
+file=open('wh_already_answered.txt','r')
+wh_answered=eval(file.readline())
+file.close()
 #=========================================================================================
 
 
@@ -146,6 +154,9 @@ def capital_of(srch):
 #a semplified bing search function for questions
 #=======================================================================================
 def bing_search_questions(srch):
+    global wh_answered
+    
+    initial_sentence=srch
     if 'who' in srch or 'where' in srch or 'what' in srch:
         srch=srch+'wikipedia'
     pos=0
@@ -157,30 +168,36 @@ def bing_search_questions(srch):
     req = Request(results[0].get('link'),headers={'User-Agent': 'Mozilla/5.0'})
     stringa = urllib.request.urlopen(req).read(100000)
     soup = BeautifulSoup(stringa,"lxml")
+    
     if('wikipedia' in link):
         txt=soup.find('div',id="bodyContent")
+        answer_is=txt.find('p').getText()
+        print (AI_speaking,answer_is )
+        wh_answered[initial_sentence]=answer_is
+        file=open("wh_already_answered.txt","w")
+        file.write(str(wh_answered))
+        file.close()
         
-        print (AI_speaking, txt.find('p').getText())
-        return
+        
 
    
         
-    
-    new = soup.find_all('p')
-    table=soup.find_all('td')
-    for tab in table:
-        if new[pos] in tab:
-           
-            pos=pos+1
-    try:
-        ln=len(new[pos].getText())
-        if (ln<30):
-            print(AI_speaking,new[pos].getText().replace('\n',' '))
-            print(AI_speaking,new[pos+1].getText().replace('\n',' '))
-        else:
-            print(new[pos].getText())
-    except IndexError:
-            print(AI_speaking,"I have found nothing")
+    else:
+        new = soup.find_all('p')
+        table=soup.find_all('td')
+        for tab in table:
+            if new[pos] in tab:
+               
+                pos=pos+1
+        try:
+            ln=len(new[pos].getText())
+            if (ln<30):
+                print(AI_speaking,new[pos].getText().replace('\n',' '))
+                print(AI_speaking,new[pos+1].getText().replace('\n',' '))
+            else:
+                print(new[pos].getText())
+        except IndexError:
+                print(AI_speaking,"I have found nothing")
     
 #=======================================================================================
 #end it
@@ -274,8 +291,8 @@ def reply_question(sent):
     wh_starts=["WRB","WP","WDT"]
     
     
-    if '?' in sent:
-        sent=sent.replace('?',' ')
+    if '?' not in sent:
+        sent=sent+'?'
         
         
 
@@ -284,8 +301,14 @@ def reply_question(sent):
         if 'capital' in sent:
             capital_of(sent)
             status=1
-            
-    
+
+    if sent in list(general_questions.keys()):
+        print(AI_speaking,general_questions.get(sent))
+        status=1
+
+    if sent in list(wh_answered.keys()):
+        print(AI_speaking,wh_answered.get(sent))
+        status=1
             
     if status==0:
         if ('you' in sent or 'your' in sent):
@@ -336,7 +359,7 @@ def reply_question(sent):
         tag=tbsent.tags
        
         if (tag[0][1] in wh_starts and 'you' not in sent):
-            print("d")
+            
             bing_search_questions(sent)
             status=1
  
@@ -388,7 +411,7 @@ def output_keywords(keywords):
         if w in keywords_dict.get("regards"):
             print(AI_speaking,random.choice(how_are_you_array))
         elif w in keywords_dict.get("hwy positive"):
-            print(AI_speaking,"This is cool!")
+            print(AI_speaking,"This is cool! I'm always fine (for now)")
             print(AI_speaking,"Tell me something you like for example ")
         elif w in keywords_dict.get("hwy negative"):
             print("Come'on everythings will be good!")
@@ -581,7 +604,7 @@ while True:
             elif (is_question == 1):
                reply_question(sent)
             else:
-               print (AI_speaking, "cool")
+               print (AI_speaking, "yeah")
         core=1
     else:
         sent=input(user_speaking).lower()

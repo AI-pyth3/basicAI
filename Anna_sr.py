@@ -20,6 +20,7 @@ import wikipedia
 import urllib.request
 import webbrowser
 import os
+import speech_recognition as sr
 #=========================================================================================
 
 
@@ -80,7 +81,30 @@ is_connected()
 #======================================================================================
 #end it
 #=====================================================================================
-
+def input_type():
+    global input_mode, anna_answered
+    if input_mode==0:
+        sent=input(user_speaking).lower()
+        return sent
+    
+    if input_mode==1:
+        r = sr.Recognizer()
+        with sr.Microphone() as source:
+            print(user_speaking, end=' ')
+            audio = r.listen(source)
+        try:
+            sent=r.recognize_google(audio,key="AIzaSyCQxkevHmo0caLeAvxMnUXv1TNSOi2oxdE")
+            print(sent)
+            return sent
+        except sr.UnknownValueError:
+           
+            print("\n",AI_speaking," sorry I can't understand you")
+            sent=-1
+            return sent
+        except sr.RequestError as e:
+            print("Could not request results from Google Speech Recognition service; {0}".format(e))
+            sent=-1
+            return sent
 
 #=====================================================================================
 #function for synset
@@ -117,11 +141,13 @@ def bing_search(srch):
         code+=1
         
     print(AI_speaking,"Do you want to open one of the previuos link?")
-    openit=input().lower()
+    openit=input_type()
     
     if (openit=="yes"):
         ch_output=AI_speaking+"Tell me the code of the link you want to open :) "
-        ch_code=input(ch_output)
+        
+        print(ch_output, end=' ')
+        ch_code=input_type()
         ch_code=int(ch_code)
         anna_answered=True
         if (1<=ch_code<=3):
@@ -348,7 +374,7 @@ def make_wiki_search(sent):
       print (wikipedia.summary(newword))
     elif (search == 1):
       print("OK, but what should I search?")
-      newword = input(user_speaking)
+      newword = input_type()
       print ("\n")
       print (wikipedia.summary(newword))
       
@@ -590,7 +616,7 @@ def general_array_output(kw,sentiment):
                 
                 if array_kq[0]==0:
                     print(AI_speaking,(key_question %w))
-                    answer=input(user_speaking).lower()
+                    answer=input_type()
                     questions_dict['team sports'][key_question].append({w:answer})
                     array_kq[0]=1
                     
@@ -611,17 +637,17 @@ def general_array_output(kw,sentiment):
                     
                     if found==False:
                         print(AI_speaking,(key_question %w))
-                        answer=input(user_speaking).lower()
+                        answer=input_type()
                         questions_dict['team sports'][key_question].append({w:answer})
                         array_kq[0]=1
                         pos=keywords_dict.get('positive answers')
                         
                         print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
-                        print(questions_dict)
+                        
                         anna_answered=True
                 else:
                     print(AI_speaking,(key_question %w))
-                    answer=input(user_speaking).lower()
+                    answer=input_type()
                     print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
                     anna_answered=True
                     
@@ -631,7 +657,7 @@ def general_array_output(kw,sentiment):
                 questions=questions_dict.get('negative sports')
                 key_question=random.choice(list(questions.keys()))
                 print(AI_speaking,(key_question))
-                answer=input(user_speaking).lower()
+                answer=input_type()
                 print(AI_speaking,(random.choice(keywords_dict.get('negative answers'))))
                 anna_answered=True
 
@@ -644,7 +670,7 @@ def general_array_output(kw,sentiment):
                 
                 if array_kq[0]==0:
                     print(AI_speaking,(key_question %w))
-                    answer=input(user_speaking).lower()
+                    answer=input_type()
                     questions_dict['single sports'][key_question].append({w:answer})
                     array_kq[0]=1
                     
@@ -665,7 +691,7 @@ def general_array_output(kw,sentiment):
                     
                     if found==False:
                         print(AI_speaking,(key_question %w))
-                        answer=input(user_speaking).lower()
+                        answer=input_type()
                         questions_dict['team sports'][key_question].append({w:answer})
                         array_kq[0]=1
                         pos=keywords_dict.get('positive answers')
@@ -675,7 +701,7 @@ def general_array_output(kw,sentiment):
                         anna_answered=True
                 else:
                     print(AI_speaking,(key_question %w))
-                    answer=input(user_speaking).lower()
+                    answer=input_type()
                     print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
                     anna_answered=True
 
@@ -683,7 +709,7 @@ def general_array_output(kw,sentiment):
                 questions=questions_dict.get('negative sports')
                 key_question=random.choice(list(questions.keys()))
                 print(AI_speaking,(key_question))
-                answer=input(user_speaking).lower()
+                answer=input_type()
                 print(AI_speaking,(random.choice(keywords_dict.get('negative answers'))))
                 anna_answered=True
                 
@@ -694,7 +720,7 @@ def general_array_output(kw,sentiment):
                 array_kq=questions.get(key_question)
                # print(AI_speaking,(random.choice(tendence_questions)%w))
                 print(AI_speaking,(key_question %w))
-                answer=input(user_speaking).lower()
+                answer=input_type()
                 print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
                 anna_answered=True
             else:
@@ -702,7 +728,7 @@ def general_array_output(kw,sentiment):
                questions=questions_dict.get('negative tendences')
                key_question=random.choice(list(questions.keys()))
                print(AI_speaking,(key_question))
-               answer=input(user_speaking).lower()
+               answer=input_type()
                print(AI_speaking,(random.choice(keywords_dict.get('negative answers'))))
                anna_answered=True
         
@@ -764,35 +790,48 @@ if_not_answered=["Life is good","Life is too short","Na na Na na","Why not?","Ps
 user_speaking=user_name+" >> "
 
 core=1
-
+input_mode=0
 while True:
 
-    sent=input(user_speaking).lower()
-    anna_answered=False
-    dep = basic_maths(sent)
-    is_question = 0
-    if (dep == 0):
-      questions(sent)
-    if (is_question == 1):
-      reply_question(sent)
+    sent=input_type()
+    
+    if sent=="change input type":
+        if input_mode==0:
+            input_mode=1
+            print(AI_speaking," okay, now you have to use your voice :P")
+        elif input_mode==1:
+            input_mode=0
+            print(AI_speaking," okay, now you have to type :P")
+        sent=-1
+   
+    if sent!=-1:
+        anna_answered=False
+        dep = basic_maths(sent)
+        is_question = 0
+        if (dep == 0):
+            questions(sent)
+        if (is_question == 1):
+            reply_question(sent)
+        else:
+            input_keywords=check_keywords(sent)
+            output_keywords(input_keywords)
+        if anna_answered==False:
+          check = "yes"
+          if check == "yes":
+              if network == 0:
+                  dict_synset(sent)
+              else:
+                  check_wiki_search(sent)
+                  questions(sent)
+                  if (is_wiki_search == 1):
+                      make_wiki_search(sent)
+                  elif (is_question == 1):
+                      reply_question(sent)
+        if anna_answered==False:
+          print (AI_speaking,random.choice(if_not_answered))
+          anna_answered=True
     else:
-      input_keywords=check_keywords(sent)
-      output_keywords(input_keywords)
-    if anna_answered==False:
-        check = "yes"
-        if check == "yes":
-            if network == 0:
-                dict_synset(sent)
-            else:
-                check_wiki_search(sent)
-                questions(sent)
-                if (is_wiki_search == 1):
-                    make_wiki_search(sent)
-                elif (is_question == 1):
-                    reply_question(sent)
-    if anna_answered==False:
-        print (AI_speaking,random.choice(if_not_answered))
-        anna_answered=True
+        pass
           
 
 #=============================================================================================

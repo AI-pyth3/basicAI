@@ -233,33 +233,48 @@ def basic_maths(sent):
     dig = []
     count = 0
     check = 0
+    check_maths = 0
     checkdup = 0
     checksub = 0
-    check_maths = 0
+    checkadd = 0
+    checkmul = 0
+    checksup = 0
+    checkdiv = 0
     for i in range(0, countin):
-        if (words[i] == "add"):
+        if (words[i] == "add") and (checkadd == 0 ):
             check = 1
             checkdup = checkdup + 1
-        if (words[i] == "multiply"):
+            checkadd = 1
+        if (words[i] == "multiply") and (checkmul == 0 ):
             check = 2
             checkdup = checkdup + 1
-        if (words[i] == "subtract"):
+            checkmul = 1
+        if (words[i] == "subtract") and (checksup == 0 ):
             for i in range(0, countin):
                 if (words[i] == "from"):
                     checksub = 13
                     break
             check = 3
             checkdup = checkdup + 1
-        if (words[i] == "divide"):
+            checksup = 1
+        if (words[i] == "divide") and (checkdiv == 0 ):
             check = 4
             checkdup = checkdup + 1
+            checkdiv = 1
+    if (checkdup == 1) and (countin == 1):
+        print (AI_speaking," but what should I", words[0])
+        a = input("Enter first no. : ")
+        b = input("Enter second no. : ")
+        words.append(a)
+        words.append(b)
     if (checkdup > 1):
         check = 0	
+    countin = len(words)
     for i in range(0, countin):
         try:
             x = words[i]
             try:
-                x = int(x)
+                x = float(x)
             except:
                 count = 1
             x = x+1
@@ -273,7 +288,11 @@ def basic_maths(sent):
         if (check == 1):
             for i in range(0, count):
                 addit = addit + dig[i]
+<<<<<<< HEAD
             print (AI_speaking,"answer is :", addit )
+=======
+            print (AI_speaking," answer is :", addit )
+>>>>>>> 007b622486547664c45c4e3a3f85ce8bdbe353a9
             check_maths = 1
             return check_maths;
         if (check == 2):
@@ -285,14 +304,19 @@ def basic_maths(sent):
             check_maths = 1
             return check_maths;
         if (check == 3):
+            addit = 0
             if (checksub == 0):
                 addit = dig[0] - addit
                 for i in range(1, count):
                     addit = addit - dig[i]
             else:
                 addit = dig[1] - dig [0]
+<<<<<<< HEAD
                 print (AI_speaking," answer is :", addit )
                 anna_answered=True
+=======
+            print (AI_speaking," answer is :", addit )
+>>>>>>> 007b622486547664c45c4e3a3f85ce8bdbe353a9
             check_maths = 1
             return check_maths;
         if (check == 4):

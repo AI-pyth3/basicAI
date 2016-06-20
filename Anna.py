@@ -294,7 +294,7 @@ def basic_maths(sent):
             addit = 1
             for i in range(0, count):
                 addit = addit * dig[i]
-                print (AI_speaking," answer is :", addit )
+            print (AI_speaking," answer is :", addit )
             check_maths = 1
             return check_maths;
         if (check == 3):

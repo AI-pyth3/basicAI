@@ -222,6 +222,88 @@ def bing_search_questions(srch):
 #end it
 #=======================================================================================
 
+#=======================================================================================
+#basic maths function
+#=======================================================================================
+def basic_maths(sent):
+    AI_speaking="Anna >> "
+    words = sent.split()
+    countin = len(sent.split())
+    dig = []
+    count = 0
+    check = 0
+    checkdup = 0
+    checksub = 0
+    check_maths = 0
+    for i in range(0, countin):
+        if (words[i] == "add"):
+            check = 1
+            checkdup = checkdup + 1
+        if (words[i] == "multiply"):
+            check = 2
+            checkdup = checkdup + 1
+        if (words[i] == "subtract"):
+            for i in range(0, countin):
+                if (words[i] == "from"):
+                    checksub = 13
+                    break
+            check = 3
+            checkdup = checkdup + 1
+        if (words[i] == "divide"):
+            check = 4
+            checkdup = checkdup + 1
+    if (checkdup > 1):
+        check = 0	
+    for i in range(0, countin):
+        try:
+            x = words[i]
+            try:
+                x = int(x)
+            except:
+                count = 1
+            x = x+1
+            x = x-1
+            dig.append(x)
+        except TypeError:
+            count = 1
+    count = len(dig)
+    addit = 0
+    if (checkdup == 1):
+        if (check == 1):
+            for i in range(0, count):
+                addit = addit + dig[i]
+            print ("answer is :", addit )
+            check_maths = 1
+            return check_maths;
+        if (check == 2):
+            addit = 1
+            for i in range(0, count):
+                addit = addit * dig[i]
+            print (AI_speaking," answer is :", addit )
+            check_maths = 1
+            return check_maths;
+        if (check == 3):
+            if (checksub == 0):
+                addit = dig[0] - addit
+                for i in range(1, count):
+                    addit = addit - dig[i]
+            else:
+                addit = dig[1] - dig [0]
+                print (AI_speaking," answer is :", addit )
+            check_maths = 1
+            return check_maths;
+        if (check == 4):
+            if (dig[1] == 0):
+                print (AI_speaking," division by zero not possible")
+            else:
+                addit = dig[0]/dig[1]
+                print (AI_speaking," answer is :", addit )
+            check_maths = 1
+            return check_maths;
+        anna_answered=True
+    return check_maths;
+#=======================================================================================
+
 
 #=======================================================================================
 #search check function
@@ -682,7 +764,10 @@ while True:
 
     sent=input(user_speaking).lower()
     anna_answered=False
-    questions(sent)
+    dep = basic_maths(sent)
+    is_question = 0
+    if (dep == 0):
+      questions(sent)
     if (is_question == 1):
       reply_question(sent)
     else:

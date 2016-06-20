@@ -273,7 +273,7 @@ def basic_maths(sent):
         try:
             x = words[i]
             try:
-                x = int(x)
+                x = float(x)
             except:
                 count = 1
             x = x+1

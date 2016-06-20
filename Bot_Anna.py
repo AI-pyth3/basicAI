@@ -19,7 +19,6 @@ import socket
 import wikipedia
 import urllib.request
 import webbrowser
-import os
 #=========================================================================================
 
 
@@ -27,6 +26,12 @@ import os
 global core, network, sent, is_question, is_wiki_search
 AI_speaking="Anna >> "
 #=========================================================================================
+import sys
+import time
+import pprint
+import telepot
+TOKEN = "150495625:AAGQhNVK1dZ_y3Yl3vXOuywWoWbapWA2jZ8"
+bot = telepot.Bot(TOKEN)
 
 
 #=========================================================================================
@@ -86,14 +91,12 @@ is_connected()
 #function for synset
 #======================================================================================
 def dict_synset(sent):
-    global anna_answered
     synset = wordnet.synsets( sent )
     print("Name:", synset[0].name())
     print("Lexical Type:", synset[0].lexname())
     print("Lemmas:", synset[0].lemma_names())
     print("Definition:", synset[0].definition())
     print("\n\n",AI_speaking,"Hope you got the answer")
-    anna_answered=True
     return;
 #=======================================================================================
 #end it
@@ -103,7 +106,6 @@ def dict_synset(sent):
 #bing search function
 #=======================================================================================
 def bing_search(srch):
-    global anna_answered
     result=Bing.search(srch,3,0,country_code="gb")
     code=0
     for r in result.get('results'):
@@ -118,29 +120,18 @@ def bing_search(srch):
         
     print(AI_speaking,"Do you want to open one of the previuos link?")
     openit=input().lower()
-    
     if (openit=="yes"):
         ch_output=AI_speaking+"Tell me the code of the link you want to open :) "
         ch_code=input(ch_output)
         ch_code=int(ch_code)
-        anna_answered=True
         if (1<=ch_code<=3):
             results=result.get('results')
             link_to_open=results[ch_code-1].get('link')
             webbrowser.open_new(link_to_open)
-            print(AI_speaking,"Here you are :)")
-        else:
-            print(AI_speaking,"This is not a valid code :(")
-            
-    else:
-        print(AI_speaking,"Oh ok :)")
-        anna_answered=True
 #=======================================================================================
 #end it
 #=======================================================================================
 def capital_of(srch):
-    global anna_answered
-    
     srch=srch+" capital of"
     result=Bing.search(srch,1,0,country_code="gb")
    
@@ -165,12 +156,11 @@ def capital_of(srch):
         else:
             pass
     print(AI_speaking,capital)
-    anna_answered=True
 #=======================================================================================
 #a semplified bing search function for questions
 #=======================================================================================
 def bing_search_questions(srch):
-    global wh_answered, anna_answered
+    global wh_answered
     
     initial_sentence=srch
     if 'who' in srch or 'where' in srch or 'what' in srch:
@@ -189,7 +179,6 @@ def bing_search_questions(srch):
         txt=soup.find('div',id="bodyContent")
         answer_is=txt.find('p').getText()
         print (AI_speaking,answer_is )
-        anna_answered=True
         wh_answered[initial_sentence]=answer_is
         file=open("wh_already_answered.txt","w")
         file.write(str(wh_answered))
@@ -211,12 +200,10 @@ def bing_search_questions(srch):
             if (ln<30):
                 print(AI_speaking,new[pos].getText().replace('\n',' '))
                 print(AI_speaking,new[pos+1].getText().replace('\n',' '))
-                anna_answered=True
             else:
                 print(new[pos].getText())
         except IndexError:
                 print(AI_speaking,"I have found nothing")
-                anna_answered=True
     
 #=======================================================================================
 #end it
@@ -244,7 +231,6 @@ def check_wiki_search(sent):
 #wikipedia search function
 #========================================================================================
 def make_wiki_search(sent):
-    global anna_answered
     sent += " fixforsearch"
     search = 0
     count = 0
@@ -264,11 +250,9 @@ def make_wiki_search(sent):
       newword = input(user_speaking)
       print ("\n")
       print (wikipedia.summary(newword))
-      
     else:
       return;
     print("\n\n",AI_speaking,"Hope you got the answer")
-    anna_answered=True
     return;
 #=========================================================================================
 #end
@@ -308,9 +292,7 @@ def questions(sent):
 #reply to questions function
 #===========================================================================================
 def reply_question(sent):
-    global anna_answered
     like_general_answers=["I'm not interested in it","I don't know a lot about it","Idk it"]
-    general_answers=["What do you think?","I like potatoes","I like the stars","Are you really asking me this?"]
     status=0
     wh_starts=["WRB","WP","WDT"]
     
@@ -328,7 +310,6 @@ def reply_question(sent):
 
     if sent in list(general_questions.keys()):
         print(AI_speaking,general_questions.get(sent))
-        
         status=1
 
     if sent in list(wh_answered.keys()):
@@ -387,13 +368,8 @@ def reply_question(sent):
             
             bing_search_questions(sent)
             status=1
-
-    if status==0:
-        print(AI_speaking,random.choice(general_answers))
-        status=1
-        
-    if status==1:
-        anna_answered=True
+ 
+            
         
                 
               
@@ -435,20 +411,17 @@ def check_keywords(sentence):
 #===========================================================================================
 def output_keywords(keywords):
     
-    global sentiment, core, anna_answered
+    global sentiment, core
     if (len(keywords)!=0):
         w=keywords[0]
         if w in keywords_dict.get("regards"):
             print(AI_speaking,random.choice(how_are_you_array))
-            anna_answered=True
         elif w in keywords_dict.get("hwy positive"):
             print(AI_speaking,"This is cool! I'm always fine (for now)")
             print(AI_speaking,"Tell me something you like for example ")
-            anna_answered=True
         elif w in keywords_dict.get("hwy negative"):
             print("Come'on everythings will be good!")
             print(AI_speaking,"Tell me something new ")
-            anna_answered=True
             
         elif w in keywords_dict.get("negative"):
             sentiment=-1
@@ -469,11 +442,9 @@ def output_keywords(keywords):
             general_array_output(keywords,sentiment)
         else:
             if sentiment==1:
-                print(AI_speaking,random.choice(keywords_dict.get('positive answers')))
-                anna_answered=True
+                print(AI_speaking,random.choice(positive_answers))
             elif sentiment==-1:
-                print(AI_speaking,random.choice(keywords_dict.get('negative answers')))
-                anna_answered=True
+                print(AI_speaking,random.choice(negative_answers))
        # elif w in vip_array:
         #    if sentiment==1:
          #       print(AI_speaking,random.choice(positive_answers))
@@ -486,8 +457,8 @@ def output_keywords(keywords):
 
  
 #===========================================================================================            
-def general_array_output(kw,sentiment):
-    global user_speaking, anna_answered
+def general_array_output(kw,sentiment,user_id):
+    global user_speaking
     found=False
     file=open("questions.txt","r")
     questions_dict=eval(file.read())
@@ -502,14 +473,13 @@ def general_array_output(kw,sentiment):
                 array_kq=questions.get(key_question)
                 
                 if array_kq[0]==0:
-                    print(AI_speaking,(key_question %w))
+                    risposta=(key_question %w))
                     answer=input(user_speaking).lower()
                     questions_dict['team sports'][key_question].append({w:answer})
                     array_kq[0]=1
                     
                     
                     print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
-                    anna_answered=True
                 
                 elif array_kq[0]==1:
                     for saved_ans in array_kq:
@@ -518,7 +488,6 @@ def general_array_output(kw,sentiment):
                             
                             if sport[0]==w:
                                 print(AI_speaking,"I know, I asked you'",(key_question %w),"' and you said '",saved_ans.get(sport[0]),"'")
-                                anna_answered=True
                                 found=True
                                 break
                     
@@ -531,12 +500,10 @@ def general_array_output(kw,sentiment):
                         
                         print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
                         print(questions_dict)
-                        anna_answered=True
                 else:
                     print(AI_speaking,(key_question %w))
                     answer=input(user_speaking).lower()
                     print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
-                    anna_answered=True
                     
                 
             else:
@@ -546,7 +513,6 @@ def general_array_output(kw,sentiment):
                 print(AI_speaking,(key_question))
                 answer=input(user_speaking).lower()
                 print(AI_speaking,(random.choice(keywords_dict.get('negative answers'))))
-                anna_answered=True
 
                 
         if w in keywords_dict.get('single sports'):
@@ -563,7 +529,6 @@ def general_array_output(kw,sentiment):
                     
                     
                     print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
-                    anna_answered=True
                 
                 elif array_kq[0]==1:
                     for saved_ans in array_kq:
@@ -572,7 +537,6 @@ def general_array_output(kw,sentiment):
                             
                             if sport[0]==w:
                                 print(AI_speaking,"I know, I asked you'",(key_question %w),"' and you said '",saved_ans.get(sport[0]),"'")
-                                anna_answered=True
                                 found=True
                                 break
                     
@@ -583,22 +547,19 @@ def general_array_output(kw,sentiment):
                         array_kq[0]=1
                         pos=keywords_dict.get('positive answers')
                         
-                        print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
-                        
-                        anna_answered=True
+                        #print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
+                        #print(questions_dict)
                 else:
                     print(AI_speaking,(key_question %w))
-                    answer=input(user_speaking).lower()
-                    print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
-                    anna_answered=True
+                   # answer=input(user_speaking).lower()
+                    #print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
 
             else:
                 questions=questions_dict.get('negative sports')
                 key_question=random.choice(list(questions.keys()))
                 print(AI_speaking,(key_question))
-                answer=input(user_speaking).lower()
-                print(AI_speaking,(random.choice(keywords_dict.get('negative answers'))))
-                anna_answered=True
+                #answer=input(user_speaking).lower()
+                #print(AI_speaking,(random.choice(keywords_dict.get('negative answers'))))
                 
         if w in keywords_dict.get('tendences'):
             if sentiment==1:
@@ -607,17 +568,15 @@ def general_array_output(kw,sentiment):
                 array_kq=questions.get(key_question)
                # print(AI_speaking,(random.choice(tendence_questions)%w))
                 print(AI_speaking,(key_question %w))
-                answer=input(user_speaking).lower()
-                print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
-                anna_answered=True
+                #answer=input(user_speaking).lower()
+               # print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
             else:
                # print(AI_speaking,random.choice(negative_tendences_questions))
                questions=questions_dict.get('negative tendences')
                key_question=random.choice(list(questions.keys()))
                print(AI_speaking,(key_question))
-               answer=input(user_speaking).lower()
-               print(AI_speaking,(random.choice(keywords_dict.get('negative answers'))))
-               anna_answered=True
+              # answer=input(user_speaking).lower()
+             #  print(AI_speaking,(random.choice(keywords_dict.get('negative answers'))))
         
                 
     file=open("questions.txt","w")
@@ -627,83 +586,54 @@ def general_array_output(kw,sentiment):
 
 
 #===========================================================================================
-if (os.path.isfile('user_name.txt')==False):
-    print(AI_speaking,"Hi I'm Anna, a virtual AI. You can talk with me for example if you don't know what to do..")
-    print(AI_speaking,"But first of all I need to know your name..")
-    it_is_a_name=False
-    while it_is_a_name==False:
-        pos_name=input("So what's your name? : ").title()
-        pos_name=TextBlob(pos_name)
-        nnp=False
-        for tag in pos_name.tags:
-            if tag[1]=='NNP':
-                nnp=True
-        
-        for tag in pos_name.tags:
-            
-            if nnp==False:
-                if  tag[1]== 'NN':
-                    user_name=tag[0]
-                    print(AI_speaking,random.choice(keywords_dict.get('regards'))," ",user_name)
-                    file=open('user_name.txt','a')
-                    file.write(user_name)
-                    file.close()
-                    it_is_a_name=True
-            if nnp==True:
-                if tag[1]=='NNP':
-                    user_name=tag[0]
-                    print(AI_speaking,random.choice(keywords_dict.get('regards'))," ",user_name)
-                    file=open('user_name.txt','a')
-                    file.write(user_name)
-                    file.close()
-                    it_is_a_name=True
-                    
-        if it_is_a_name==False:
-            print(AI_speaking,"This can't be your name! Are you already kidding me??? >.>")
-
-else:
-    file=open('user_name.txt','r')
-    user_name=file.read()
-    file.close()
-    print(AI_speaking," Welcome back ",user_name,"!")
-    print(AI_speaking," How are you?? :)")
-    
-    
-    
-        
-
-            
-if_not_answered=["Life is good","Life is too short","Na na Na na","Why not?","Psss, yes you..","yeah","coool","ah ah ah"]
+"""
+print(AI_speaking,"Hi I'm Anna, a virtual AI. You can talk with me for example if you don't know what to do..")
+print(AI_speaking,"But first of all I need to know your name..")
+user_name=input("So what's your name? : ")
 user_speaking=user_name+" >> "
-
+print(AI_speaking,random.choice(keywords_dict.get('regards'))," ",user_name)
+"""
 core=1
 
-while True:
-
-    sent=input(user_speaking).lower()
-    anna_answered=False
-    questions(sent)
-    if (is_question == 1):
-      reply_question(sent)
-    else:
-      input_keywords=check_keywords(sent)
-      output_keywords(input_keywords)
-    if anna_answered==False:
+def handle(msg):
+    global core
+    content_type, chat_type, chat_id = telepot.glance(msg)  #rilevazione di alcune informazioni utili contenute in una tupla
+                                                            #chat_id corrisponde all'id dell'utente, esso sarà utilizzato per sapere a chi si dovrà rispondere
+    scelta=msg.get('text')
+    print(scelta)
+    
+    if (core == 0):
+#        print(AI_speaking," should I make a search for it?? cause I do not understand this :( ")
+#        check=input(user_speaking).lower()
         check = "yes"
         if check == "yes":
-            if network == 0:
-                dict_synset(sent)
+          if network == 0:
+            dict_synset(sent)
+          else:
+            check_wiki_search(sent)
+            questions(sent)
+            if (is_wiki_search == 1):
+               make_wiki_search(sent)
+            elif (is_question == 1):
+               reply_question(sent)
             else:
-                check_wiki_search(sent)
-                questions(sent)
-                if (is_wiki_search == 1):
-                    make_wiki_search(sent)
-                elif (is_question == 1):
-                    reply_question(sent)
-    if anna_answered==False:
-        print (AI_speaking,random.choice(if_not_answered))
-        anna_answered=True
-          
+               print("yeah")
+        core=1
+    else:
+        sent=scelta.lower()
+        questions(sent)
+        if (is_question == 1):
+          reply_question(sent)
+        else:
+          input_keywords=check_keywords(sent)
+          output_keywords(input_keywords)
+    
+    #bot.sendMessage(chat_id,risposta)
+
+bot.message_loop(handle) 
+while 1:
+    time.sleep(10)
 
 #=============================================================================================
 #=============================================================================================
+

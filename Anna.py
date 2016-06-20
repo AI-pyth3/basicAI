@@ -288,11 +288,8 @@ def basic_maths(sent):
         if (check == 1):
             for i in range(0, count):
                 addit = addit + dig[i]
-<<<<<<< HEAD
             print (AI_speaking,"answer is :", addit )
-=======
-            print (AI_speaking," answer is :", addit )
->>>>>>> 007b622486547664c45c4e3a3f85ce8bdbe353a9
+            anna_answered=True
             check_maths = 1
             return check_maths;
         if (check == 2):
@@ -311,12 +308,8 @@ def basic_maths(sent):
                     addit = addit - dig[i]
             else:
                 addit = dig[1] - dig [0]
-<<<<<<< HEAD
-                print (AI_speaking," answer is :", addit )
-                anna_answered=True
-=======
             print (AI_speaking," answer is :", addit )
->>>>>>> 007b622486547664c45c4e3a3f85ce8bdbe353a9
+            anna_answered=True
             check_maths = 1
             return check_maths;
         if (check == 4):

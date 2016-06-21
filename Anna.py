@@ -343,7 +343,7 @@ def check_wiki_search(sent):
     words = sent.split()
     countin = len(sent.split())
     for i in range(0, countin):
-      if (words[i] == "search"):
+      if (words[i] == "search") or (words[i] == "search?"):
         is_wiki_search = 1
         break
     return;

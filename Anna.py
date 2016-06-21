@@ -20,6 +20,7 @@ import wikipedia
 import urllib.request
 import webbrowser
 import os
+import speech_recognition as sr
 #=========================================================================================
 
 
@@ -80,7 +81,30 @@ is_connected()
 #======================================================================================
 #end it
 #=====================================================================================
-
+def input_type():
+    global input_mode, anna_answered
+    if input_mode==0:
+        sent=input(user_speaking).lower()
+        return sent
+    
+    if input_mode==1:
+        r = sr.Recognizer()
+        with sr.Microphone() as source:
+            print(user_speaking, end=' ')
+            audio = r.listen(source)
+        try:
+            sent=r.recognize_google(audio,key="AIzaSyCQxkevHmo0caLeAvxMnUXv1TNSOi2oxdE")
+            print(sent)
+            return sent
+        except sr.UnknownValueError:
+           
+            print("\n",AI_speaking," sorry I can't understand you")
+            sent=-1
+            return sent
+        except sr.RequestError as e:
+            print("Could not request results from Google Speech Recognition service; {0}".format(e))
+            sent=-1
+            return sent
 
 #=====================================================================================
 #function for synset
@@ -104,119 +128,134 @@ def dict_synset(sent):
 #=======================================================================================
 def bing_search(srch):
     global anna_answered
-    result=Bing.search(srch,3,0,country_code="gb")
-    code=0
-    for r in result.get('results'):
-        print("\n\n")
-        print("Title: ",r.get('link_text'))
-        print("Description: ",r.get('link_info'))
-        print("Link: ",r.get('link'))
-        print("Code: ",code+1)
-        print("\n\n")
-        
-        code+=1
-        
-    print(AI_speaking,"Do you want to open one of the previuos link?")
-    openit=input().lower()
-    
-    if (openit=="yes"):
-        ch_output=AI_speaking+"Tell me the code of the link you want to open :) "
-        ch_code=input(ch_output)
-        ch_code=int(ch_code)
-        anna_answered=True
-        if (1<=ch_code<=3):
-            results=result.get('results')
-            link_to_open=results[ch_code-1].get('link')
-            webbrowser.open_new(link_to_open)
-            print(AI_speaking,"Here you are :)")
-        else:
-            print(AI_speaking,"This is not a valid code :(")
+    network=is_connected()
+    if network==1:
+        result=Bing.search(srch,3,0,country_code="gb")
+        code=0
+        for r in result.get('results'):
+            print("\n\n")
+            print("Title: ",r.get('link_text'))
+            print("Description: ",r.get('link_info'))
+            print("Link: ",r.get('link'))
+            print("Code: ",code+1)
+            print("\n\n")
             
-    else:
-        print(AI_speaking,"Oh ok :)")
+            code+=1
+            
+        print(AI_speaking,"Do you want to open one of the previuos link?")
+        openit=input().lower()
+        
+        if (openit=="yes"):
+            ch_output=AI_speaking+"Tell me the code of the link you want to open :) "
+            ch_code=input(ch_output)
+            ch_code=int(ch_code)
+            anna_answered=True
+            if (1<=ch_code<=3):
+                results=result.get('results')
+                link_to_open=results[ch_code-1].get('link')
+                webbrowser.open_new(link_to_open)
+                print(AI_speaking,"Here you are :)")
+            else:
+                print(AI_speaking,"This is not a valid code :(")
+                
+        else:
+            print(AI_speaking,"Oh ok :)")
+            anna_answered=True
+    elif network==0:
+        print(AI_speaking,"Sorry I can't search anything now :/ I am not connected.")
         anna_answered=True
 #=======================================================================================
 #end it
 #=======================================================================================
 def capital_of(srch):
     global anna_answered
-    
-    srch=srch+" capital of"
-    result=Bing.search(srch,1,0,country_code="gb")
-   
-    results=result.get('results')
-    
-    req = Request(results[0].get('link'),headers={'User-Agent': 'Mozilla/5.0'})
-    stringa = urllib.request.urlopen(req).read(100000)
-    code=0
+    network=is_connected()
+    if network==1:
+        srch=srch+" capital of"
+        result=Bing.search(srch,1,0,country_code="gb")
+       
+        results=result.get('results')
+        
+        req = Request(results[0].get('link'),headers={'User-Agent': 'Mozilla/5.0'})
+        stringa = urllib.request.urlopen(req).read(100000)
+        code=0
 
-    soup = BeautifulSoup(stringa,"lxml")
-    
-    table=soup.find_all('td')
-    for tab in table:
+        soup = BeautifulSoup(stringa,"lxml")
+        
+        table=soup.find_all('td')
+        for tab in table:
 
-        if ('<td class="main">' in str(tab)):
-            starts_at=(str(tab)).find('<p>')+3
-            ends_at=(str(tab)).find('</p>')
-            capital=(str(tab)[starts_at:ends_at]).replace("<strong>"," ").replace("</strong>"," ")
-            
-            code=1
-            
-        else:
-            pass
-    print(AI_speaking,capital)
-    anna_answered=True
+            if ('<td class="main">' in str(tab)):
+                starts_at=(str(tab)).find('<p>')+3
+                ends_at=(str(tab)).find('</p>')
+                capital=(str(tab)[starts_at:ends_at]).replace("<strong>"," ").replace("</strong>"," ")
+                
+                code=1
+                
+            else:
+                pass
+        print(AI_speaking,capital)
+        anna_answered=True
+    elif network==0:
+        print(AI_speaking,"Sorry I can't search anything now :/ I am not connected.")
+        anna_answered=True
 #=======================================================================================
 #a semplified bing search function for questions
 #=======================================================================================
 def bing_search_questions(srch):
+    
     global wh_answered, anna_answered
-    
-    initial_sentence=srch
-    if 'who' in srch or 'where' in srch or 'what' in srch:
-        srch=srch+'wikipedia'
-    pos=0
-    result=Bing.search(srch,1,0,country_code="gb")
-   
-    results=result.get('results')
-    link=results[0].get('link')
-    
-    req = Request(results[0].get('link'),headers={'User-Agent': 'Mozilla/5.0'})
-    stringa = urllib.request.urlopen(req).read(100000)
-    soup = BeautifulSoup(stringa,"lxml")
-    
-    if('wikipedia' in link):
-        txt=soup.find('div',id="bodyContent")
-        answer_is=txt.find('p').getText()
-        print (AI_speaking,answer_is )
-        anna_answered=True
-        wh_answered[initial_sentence]=answer_is
-        file=open("wh_already_answered.txt","w")
-        file.write(str(wh_answered))
-        file.close()
+    network=is_connected()
+    if network==1:
+        initial_sentence=srch
+        if 'who' in srch or 'where' in srch or 'what' in srch:
+            srch=srch+'wikipedia'
+        pos=0
+        result=Bing.search(srch,1,0,country_code="gb")
+       
+        results=result.get('results')
+        link=results[0].get('link')
         
+        req = Request(results[0].get('link'),headers={'User-Agent': 'Mozilla/5.0'})
+        stringa = urllib.request.urlopen(req).read(100000)
+        soup = BeautifulSoup(stringa,"lxml")
         
+        if('wikipedia' in link):
+            txt=soup.find('div',id="bodyContent")
+            answer_is=txt.find('p').getText()
+            print (AI_speaking,answer_is )
+            anna_answered=True
+            wh_answered[initial_sentence]=answer_is
+            file=open("wh_already_answered.txt","w")
+            file.write(str(wh_answered))
+            file.close()
+            
+            
 
-   
-        
-    else:
-        new = soup.find_all('p')
-        table=soup.find_all('td')
-        for tab in table:
-            if new[pos] in tab:
-               
-                pos=pos+1
-        try:
-            ln=len(new[pos].getText())
-            if (ln<30):
-                print(AI_speaking,new[pos].getText().replace('\n',' '))
-                print(AI_speaking,new[pos+1].getText().replace('\n',' '))
-                anna_answered=True
-            else:
-                print(new[pos].getText())
-        except IndexError:
-                print(AI_speaking,"I have found nothing")
-                anna_answered=True
+       
+            
+        else:
+            new = soup.find_all('p')
+            table=soup.find_all('td')
+            for tab in table:
+                if new[pos] in tab:
+                   
+                    pos=pos+1
+            try:
+                ln=len(new[pos].getText())
+                if (ln<30):
+                    print(AI_speaking,new[pos].getText().replace('\n',' '))
+                    print(AI_speaking,new[pos+1].getText().replace('\n',' '))
+                    anna_answered=True
+                else:
+                    print(new[pos].getText())
+            except IndexError:
+                    print(AI_speaking,"I have found nothing")
+                    anna_answered=True
+    elif network==0:
+        print(AI_speaking,"Sorry I can't search anything now :/ I am not connected.")
+        anna_answered=True
+    
     
 #=======================================================================================
 #end it
@@ -338,14 +377,17 @@ def basic_maths(sent):
 #search check function
 #=======================================================================================
 def check_wiki_search(sent):
+
     global is_wiki_search
     is_wiki_search = 0
     words = sent.split()
     countin = len(sent.split())
     for i in range(0, countin):
+     
       if (words[i] == "search") or (words[i] == "search?"):
         is_wiki_search = 1
         break
+    
     return;
 #========================================================================================
 #========================================================================================
@@ -355,32 +397,39 @@ def check_wiki_search(sent):
 #wikipedia search function
 #========================================================================================
 def make_wiki_search(sent):
+    
     global anna_answered
-    sent += " fixforsearch"
-    search = 0
-    count = 0
-    words = sent.split()
-    countin = len(sent.split())
-    for i in range(0, countin):
-      if (words[i] == "search") or (words[i] == "search?"):
-        search = 1
-        break
-      count = count + 1
-    if (search == 1) and (words[count + 1] != "fixforsearch"):
-      newword = words[count + 1]
-      print ("\n")
-      print (wikipedia.summary(newword))
-    elif (search == 1):
-      print("OK, but what should I search?")
-      newword = input(user_speaking)
-      print ("\n")
-      print (wikipedia.summary(newword))
-      
-    else:
-      return;
-    print("\n\n",AI_speaking,"Hope you got the answer")
-    anna_answered=True
-    return;
+    network=is_connected()
+    if network==1:
+        sent += " fixforsearch"
+        search = 0
+        count = 0
+        words = sent.split()
+        countin = len(sent.split())
+        for i in range(0, countin):
+          if (words[i] == "search") or (words[i] == "search?"):
+            search = 1
+            break
+          count = count + 1
+
+        if (search == 1) and (words[count + 1] != "fixforsearch"):
+          newword = words[count + 1]
+          print ("\n")
+          print (wikipedia.summary(newword))
+        elif (search == 1):
+          print("OK, but what should I search?")
+          newword = input_type()
+          print ("\n")
+          print (wikipedia.summary(newword))
+          
+        else:
+          return;
+        print("\n\n",AI_speaking,"Hope you got the answer")
+        anna_answered=True
+        return;
+    elif network==0:
+        print(AI_speaking,"Sorry I can't search anything now :/ I am not connected.")
+        anna_answered=True
 #=========================================================================================
 #end
 #=========================================================================================
@@ -445,7 +494,15 @@ def reply_question(sent):
     if sent in list(wh_answered.keys()):
         print(AI_speaking,wh_answered.get(sent))
         status=1
-            
+        
+    if status==0:
+        check_wiki_search(sent)
+        
+        questions(sent)
+        if (is_wiki_search == 1):
+            make_wiki_search(sent)
+            status=1
+        
     if status==0:
         if ('you' in sent or 'your' in sent):
             for keyword in ["god","prayer","pray"]:
@@ -498,6 +555,18 @@ def reply_question(sent):
             
             bing_search_questions(sent)
             status=1
+
+    if status==0:
+        if sent.startswith("do you know")==True:
+            sent=sent.split("do you know")
+            sent=sent[1]
+            tbsent=TextBlob(sent)
+            tag=tbsent.tags
+       
+            if (tag[0][1] in wh_starts and 'you' not in sent):
+            
+               bing_search_questions(sent)
+               status=1
 
     if status==0:
         print(AI_speaking,random.choice(general_answers))
@@ -614,7 +683,7 @@ def general_array_output(kw,sentiment):
                 
                 if array_kq[0]==0:
                     print(AI_speaking,(key_question %w))
-                    answer=input(user_speaking).lower()
+                    answer=input_type()
                     questions_dict['team sports'][key_question].append({w:answer})
                     array_kq[0]=1
                     
@@ -635,7 +704,7 @@ def general_array_output(kw,sentiment):
                     
                     if found==False:
                         print(AI_speaking,(key_question %w))
-                        answer=input(user_speaking).lower()
+                        answer=input_type()
                         questions_dict['team sports'][key_question].append({w:answer})
                         array_kq[0]=1
                         pos=keywords_dict.get('positive answers')
@@ -645,7 +714,7 @@ def general_array_output(kw,sentiment):
                         anna_answered=True
                 else:
                     print(AI_speaking,(key_question %w))
-                    answer=input(user_speaking).lower()
+                    answer=input_type()
                     print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
                     anna_answered=True
                     
@@ -655,7 +724,7 @@ def general_array_output(kw,sentiment):
                 questions=questions_dict.get('negative sports')
                 key_question=random.choice(list(questions.keys()))
                 print(AI_speaking,(key_question))
-                answer=input(user_speaking).lower()
+                answer=input_type()
                 print(AI_speaking,(random.choice(keywords_dict.get('negative answers'))))
                 anna_answered=True
 
@@ -668,7 +737,7 @@ def general_array_output(kw,sentiment):
                 
                 if array_kq[0]==0:
                     print(AI_speaking,(key_question %w))
-                    answer=input(user_speaking).lower()
+                    answer=input_type()
                     questions_dict['single sports'][key_question].append({w:answer})
                     array_kq[0]=1
                     
@@ -689,7 +758,7 @@ def general_array_output(kw,sentiment):
                     
                     if found==False:
                         print(AI_speaking,(key_question %w))
-                        answer=input(user_speaking).lower()
+                        answer=input_type()
                         questions_dict['team sports'][key_question].append({w:answer})
                         array_kq[0]=1
                         pos=keywords_dict.get('positive answers')
@@ -699,7 +768,7 @@ def general_array_output(kw,sentiment):
                         anna_answered=True
                 else:
                     print(AI_speaking,(key_question %w))
-                    answer=input(user_speaking).lower()
+                    answer=input_type()
                     print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
                     anna_answered=True
 
@@ -707,7 +776,7 @@ def general_array_output(kw,sentiment):
                 questions=questions_dict.get('negative sports')
                 key_question=random.choice(list(questions.keys()))
                 print(AI_speaking,(key_question))
-                answer=input(user_speaking).lower()
+                answer=input_type()
                 print(AI_speaking,(random.choice(keywords_dict.get('negative answers'))))
                 anna_answered=True
                 
@@ -718,7 +787,7 @@ def general_array_output(kw,sentiment):
                 array_kq=questions.get(key_question)
                # print(AI_speaking,(random.choice(tendence_questions)%w))
                 print(AI_speaking,(key_question %w))
-                answer=input(user_speaking).lower()
+                answer=input_type()
                 print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
                 anna_answered=True
             else:
@@ -726,7 +795,7 @@ def general_array_output(kw,sentiment):
                questions=questions_dict.get('negative tendences')
                key_question=random.choice(list(questions.keys()))
                print(AI_speaking,(key_question))
-               answer=input(user_speaking).lower()
+               answer=input_type()
                print(AI_speaking,(random.choice(keywords_dict.get('negative answers'))))
                anna_answered=True
         
@@ -788,35 +857,49 @@ if_not_answered=["Life is good","Life is too short","Na na Na na","Why not?","Ps
 user_speaking=user_name+" >> "
 
 core=1
-
+input_mode=0
 while True:
 
-    sent=input(user_speaking).lower()
-    anna_answered=False
-    dep = basic_maths(sent)
-    is_question = 0
-    if (dep == 0):
-      questions(sent)
-    if (is_question == 1):
-      reply_question(sent)
+    sent=input_type()
+    
+    if sent=="change input type":
+        if input_mode==0:
+            input_mode=1
+            print(AI_speaking," okay, now you have to use your voice :P")
+        elif input_mode==1:
+            input_mode=0
+            print(AI_speaking," okay, now you have to type :P")
+        sent=-1
+   
+    if sent!=-1:
+        anna_answered=False
+        dep = basic_maths(sent)
+        is_question = 0
+        if (dep == 0):
+            questions(sent)
+        if (is_question == 1):
+            reply_question(sent)
+        else:
+            input_keywords=check_keywords(sent)
+            output_keywords(input_keywords)
+            
+        if anna_answered==False:
+          check_wiki_search(sent)
+          
+          questions(sent)
+          if (is_wiki_search == 1):
+              make_wiki_search(sent)
+          elif (is_question == 1):
+              reply_question(sent)
+                      
+        if anna_answered==False:
+          
+          print (AI_speaking,random.choice(if_not_answered))
+          anna_answered=True
     else:
-      input_keywords=check_keywords(sent)
-      output_keywords(input_keywords)
-    if anna_answered==False:
-        check = "yes"
-        if check == "yes":
-            if network == 0:
-                dict_synset(sent)
-            else:
-                check_wiki_search(sent)
-                questions(sent)
-                if (is_wiki_search == 1):
-                    make_wiki_search(sent)
-                elif (is_question == 1):
-                    reply_question(sent)
-    if anna_answered==False:
-        print (AI_speaking,random.choice(if_not_answered))
-        anna_answered=True
+        pass
+          
+
           
 
 #=============================================================================================

@@ -241,15 +241,15 @@ def basic_maths(sent):
     checksup = 0
     checkdiv = 0
     for i in range(0, countin):
-        if (words[i] == "add") and (checkadd == 0 ):
+        if ((words[i] == "add") or (words[i] == "add?")) and (checkadd == 0 ):
             check = 1
             checkdup = checkdup + 1
             checkadd = 1
-        if (words[i] == "multiply") and (checkmul == 0 ):
+        if ((words[i] == "multiply") or (words[i] == "multiply?")) and (checkmul == 0 ):
             check = 2
             checkdup = checkdup + 1
             checkmul = 1
-        if (words[i] == "subtract") and (checksup == 0 ):
+        if ((words[i] == "subtract") or (words[i] == "subtract?")) and (checksup == 0 ):
             for i in range(0, countin):
                 if (words[i] == "from"):
                     checksub = 13
@@ -257,7 +257,7 @@ def basic_maths(sent):
             check = 3
             checkdup = checkdup + 1
             checksup = 1
-        if (words[i] == "divide") and (checkdiv == 0 ):
+        if ((words[i] == "divide") or (words[i] == "divide")) and (checkdiv == 0 ):
             check = 4
             checkdup = checkdup + 1
             checkdiv = 1
@@ -282,6 +282,13 @@ def basic_maths(sent):
             dig.append(x)
         except TypeError:
             count = 1
+    count = len(dig)
+    if (checkdup == 1) and (count == 0):
+        print (AI_speaking," but what should I", words[countin-1])
+        a = float(input("Enter first no. : "))
+        b = float(input("Enter second no. : "))
+        dig.append(a)
+        dig.append(b)
     count = len(dig)
     addit = 0
     if (checkdup == 1):

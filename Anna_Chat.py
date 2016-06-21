@@ -1,8 +1,4 @@
-#=========================================================================================
-#AI_version = 0.0.6
-#AI_name = Anna
-#=========================================================================================
-
+#module name Anna_Chat
 
 #=========================================================================================
 from textblob import TextBlob
@@ -28,7 +24,7 @@ import requests
 
 
 #=========================================================================================
-global core, network, sent, is_question, is_wiki_search
+global core, network, sent, is_question, is_wiki_search, user_speaking, anna_answered
 AI_speaking="Anna >> "
 #=========================================================================================
 
@@ -80,12 +76,12 @@ def is_connected():
      network = 0
   return False
 
-is_connected()
+
 #======================================================================================
 #end it
 #=====================================================================================
 def input_type():
-    global input_mode, anna_answered
+    global anna_answered,input_mode
     if input_mode==0:
         sent=input(user_speaking).lower()
         return sent
@@ -694,7 +690,7 @@ def general_array_output(kw,sentiment):
     questions_dict=eval(file.read())
     file.close()
     word=""
- 
+    
     for w in kw:
         if w in keywords_dict.get('team sports'):
             if sentiment==1:
@@ -826,128 +822,75 @@ def general_array_output(kw,sentiment):
     file.close()
 #===========================================================================================                        
 
+def start_chat(user_name):
+  if_not_answered=["Life is good","Life is too short","Na na Na na","Why not?","Psss, yes you..","yeah","coool","ah ah ah"]
+  user_speaking=user_name+" >> "
 
-#===========================================================================================
-if (os.path.isfile('user_name.txt')==False):
-    print(AI_speaking,"Hi I'm Anna, a virtual AI. You can talk with me for example if you don't know what to do..")
-    print(AI_speaking,"But first of all I need to know your name..")
-    it_is_a_name=False
-    while it_is_a_name==False:
-        pos_name=input("So what's your name? : ").title()
-        pos_name=TextBlob(pos_name)
-        nnp=False
-        for tag in pos_name.tags:
-            if tag[1]=='NNP':
-                nnp=True
-        
-        for tag in pos_name.tags:
-            
-            if nnp==False:
-                if  tag[1]== 'NN':
-                    user_name=tag[0]
-                    print(AI_speaking,random.choice(keywords_dict.get('regards'))," ",user_name)
-                    file=open('user_name.txt','a')
-                    file.write(user_name)
-                    file.close()
-                    it_is_a_name=True
-            if nnp==True:
-                if tag[1]=='NNP':
-                    user_name=tag[0]
-                    print(AI_speaking,random.choice(keywords_dict.get('regards'))," ",user_name)
-                    file=open('user_name.txt','a')
-                    file.write(user_name)
-                    file.close()
-                    it_is_a_name=True
-                    
-        if it_is_a_name==False:
-            print(AI_speaking,"This can't be your name! Are you already kidding me??? >.>")
 
-else:
-    file=open('user_name.txt','r')
-    user_name=file.read()
-    file.close()
-    print(AI_speaking," Welcome back ",user_name,"!")
-    print(AI_speaking," How are you?? :)")
-    
-    
-    
-        
+  input_mode=0
+  while True:
 
-            
-if_not_answered=["Life is good","Life is too short","Na na Na na","Why not?","Psss, yes you..","yeah","coool","ah ah ah"]
-user_speaking=user_name+" >> "
-
-core=1
-input_mode=0
-while True:
-
-    sent=input_type()
-    
-    if sent=="change input type":
-        if input_mode==0:
-            input_mode=1
-            print(AI_speaking," okay, now you have to use your voice :P")
-        elif input_mode==1:
-            input_mode=0
-            print(AI_speaking," okay, now you have to type :P")
-        sent=-1
-   
-    if sent!=-1:
-        anna_answered=False
-        dep = basic_maths(sent)
-        is_question = 0
-        if (dep == 0):
-            questions(sent)
-        if (is_question == 1):
-            reply_question(sent)
-        if "want to know more about" in sent:
-            sent=sent.split('about',1) 
-            if len(sent[1])<2:
-                print(AI_speaking,"About what??")
-                srch=input_type()
-                if len(srch)<2:
-                    print(AI_speaking,"I can't search it :p")
-                    anna_answered=True
-                else:
-                    bing_search(srch)
-            else:
-                bing_search(sent[1])
-
-        elif "would like to lisen to" in sent or "want to listen to" in sent:
-            sent=sent.split('listen to',1) 
-            if len(sent[1])<2:
-                print(AI_speaking,"listen to what??")
-                srch=input_type()
-                if len(srch)<2:
-                    print(AI_speaking,"I can't search it :p")
-                    anna_answered=True
-                else:
-                    youtube_search(srch)
-            else:
-                youtube_search(sent[1])
-        
-        else:
-            input_keywords=check_keywords(sent)
-            output_keywords(input_keywords)
-            
-        if anna_answered==False:
-          check_wiki_search(sent)
-          
-          questions(sent)
-          if (is_wiki_search == 1):
-              make_wiki_search(sent)
-          elif (is_question == 1):
+      sent=input_type()
+      
+      if sent=="change input type":
+          if input_mode==0:
+              input_mode=1
+              print(AI_speaking," okay, now you have to use your voice :P")
+          elif input_mode==1:
+              input_mode=0
+              print(AI_speaking," okay, now you have to type :P")
+          sent=-1
+     
+      if sent!=-1:
+          anna_answered=False
+          dep = basic_maths(sent)
+          is_question = 0
+          if (dep == 0):
+              questions(sent)
+          if (is_question == 1):
               reply_question(sent)
-                      
-        if anna_answered==False:
-          
-          print (AI_speaking,random.choice(if_not_answered))
-          anna_answered=True
-    else:
-        pass
-          
+          if "want to know more about" in sent:
+              sent=sent.split('about',1) 
+              if len(sent[1])<2:
+                  print(AI_speaking,"About what??")
+                  srch=input_type()
+                  if len(srch)<2:
+                      print(AI_speaking,"I can't search it :p")
+                      anna_answered=True
+                  else:
+                      bing_search(srch)
+              else:
+                  bing_search(sent[1])
 
+          elif "would like to lisen to" in sent or "want to listen to" in sent:
+              sent=sent.split('listen to',1) 
+              if len(sent[1])<2:
+                  print(AI_speaking,"listen to what??")
+                  srch=input_type()
+                  if len(srch)<2:
+                      print(AI_speaking,"I can't search it :p")
+                      anna_answered=True
+                  else:
+                      youtube_search(srch)
+              else:
+                  youtube_search(sent[1])
           
-
-#=============================================================================================
-#=============================================================================================
+          else:
+              input_keywords=check_keywords(sent)
+              output_keywords(input_keywords)
+              
+          if anna_answered==False:
+            check_wiki_search(sent)
+            
+            questions(sent)
+            if (is_wiki_search == 1):
+                make_wiki_search(sent)
+            elif (is_question == 1):
+                reply_question(sent)
+                        
+          if anna_answered==False:
+            
+            print (AI_speaking,random.choice(if_not_answered))
+            anna_answered=True
+      else:
+          pass

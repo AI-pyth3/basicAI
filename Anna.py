@@ -257,7 +257,7 @@ def basic_maths(sent):
             check = 3
             checkdup = checkdup + 1
             checksup = 1
-        if ((words[i] == "divide") or (words[i] == "divide")) and (checkdiv == 0 ):
+        if ((words[i] == "divide") or (words[i] == "divide?")) and (checkdiv == 0 ):
             check = 4
             checkdup = checkdup + 1
             checkdiv = 1

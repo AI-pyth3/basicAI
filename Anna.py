@@ -21,6 +21,10 @@ import urllib.request
 import webbrowser
 import os
 import speech_recognition as sr
+import urllib.parse
+import re
+import requests
+
 #=========================================================================================
 
 
@@ -97,8 +101,8 @@ def input_type():
             print(sent)
             return sent
         except sr.UnknownValueError:
-           
-            print("\n",AI_speaking," sorry I can't understand you")
+            print()
+            print(AI_speaking," sorry I can't understand you")
             sent=-1
             return sent
         except sr.RequestError as e:
@@ -143,20 +147,25 @@ def bing_search(srch):
             code+=1
             
         print(AI_speaking,"Do you want to open one of the previuos link?")
-        openit=input().lower()
+        openit=input_type()
         
         if (openit=="yes"):
-            ch_output=AI_speaking+"Tell me the code of the link you want to open :) "
-            ch_code=input(ch_output)
-            ch_code=int(ch_code)
+            print(AI_speaking,"Tell me the code of the link you want to open :) ")
+            ch_code=input_type()
+            try:
+                ch_code=int(ch_code)
+            except:
+                ch_code=-1
             anna_answered=True
             if (1<=ch_code<=3):
                 results=result.get('results')
                 link_to_open=results[ch_code-1].get('link')
                 webbrowser.open_new(link_to_open)
                 print(AI_speaking,"Here you are :)")
+                anna_answered=True
             else:
                 print(AI_speaking,"This is not a valid code :(")
+                anna_answered=True
                 
         else:
             print(AI_speaking,"Oh ok :)")
@@ -167,6 +176,27 @@ def bing_search(srch):
 #=======================================================================================
 #end it
 #=======================================================================================
+def youtube_search(srch):
+    global anna_answered
+    network=is_connected()
+    if network==1:
+        query_string = urllib.parse.urlencode({"search_query" : srch})
+        html_content = urllib.request.urlopen("http://www.youtube.com/results?" + query_string)
+        search_results = re.findall(r'href=\"\/watch\?v=(.{11})', html_content.read().decode())
+        link="http://www.youtube.com/watch?v=" + search_results[0]
+        print(AI_speaking,"Do you want to open ", srch," in a web browser?")
+        openit=input_type()
+        if openit=="yes":
+            webbrowser.open_new(link)
+            anna_answered=True
+        else:
+            print(AI_speaking,"Oh ok..")
+            anna_answered=True
+        
+    elif network==0:
+        print(AI_speaking,"Sorry I can't search anything now :/ I am not connected.")
+        anna_answered=True
+        
 def capital_of(srch):
     global anna_answered
     network=is_connected()
@@ -879,6 +909,32 @@ while True:
             questions(sent)
         if (is_question == 1):
             reply_question(sent)
+        if "want to know more about" in sent:
+            sent=sent.split('about',1) 
+            if len(sent[1])<2:
+                print(AI_speaking,"About what??")
+                srch=input_type()
+                if len(srch)<2:
+                    print(AI_speaking,"I can't search it :p")
+                    anna_answered=True
+                else:
+                    bing_search(srch)
+            else:
+                bing_search(sent[1])
+
+        elif "would like to lisen to" in sent or "want to listen to" in sent:
+            sent=sent.split('listen to',1) 
+            if len(sent[1])<2:
+                print(AI_speaking,"listen to what??")
+                srch=input_type()
+                if len(srch)<2:
+                    print(AI_speaking,"I can't search it :p")
+                    anna_answered=True
+                else:
+                    youtube_search(srch)
+            else:
+                youtube_search(sent[1])
+        
         else:
             input_keywords=check_keywords(sent)
             output_keywords(input_keywords)

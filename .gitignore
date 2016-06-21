@@ -34,6 +34,7 @@ modules.builtin
 *.zip
 out/bzImage
 buildzf2
+user_name.txt
 
 #
 # Top-level generic files

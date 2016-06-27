@@ -1,5 +1,5 @@
 #=========================================================================================
-#AI_version = 0.0.6
+#AI_version = 1.0.0
 #AI_name = Anna
 #=========================================================================================
 
@@ -22,7 +22,7 @@ import os
 import speech_recognition as sr
 import urllib.parse
 import re
-import requests
+
 
 #=========================================================================================
 
@@ -34,7 +34,7 @@ AI_speaking="Anna >> "
 
 
 #=========================================================================================
-REMOTE_SERVER = "www.google.com"
+REMOTE_SERVER =     "www.google.com"
 #=========================================================================================
 
 
@@ -65,6 +65,7 @@ file.close()
 #check if we have internet connection
 #=========================================================================================
 def is_connected():
+
   global network
   try:
     # see if we can resolve the host name -- tells us if there is
@@ -78,17 +79,32 @@ def is_connected():
   except:
      pass
      network = 0
-  return False
+     return False
 
-is_connected()
+
 #======================================================================================
 #end it
-#=====================================================================================
+#======================================================================================
+
+
+#======================================================================================
+#different input depending on input mode
+#======================================================================================
 def input_type():
-    global input_mode, anna_answered
+    
+    global input_mode,anna_answered
+
     if input_mode==0:
-        sent=input(user_speaking).lower()
-        return sent
+        
+            sent=input(user_speaking).lower()
+            if sent.isspace():
+                print(AI_speaking,"Please say something of correct")
+                anna_answered=True
+                sent="-1"
+                return sent
+            else:
+                
+                return sent
     
     if input_mode==1:
         r = sr.Recognizer()
@@ -106,7 +122,7 @@ def input_type():
             return sent
         except sr.RequestError as e:
             print("Could not request results from Google Speech Recognition service; {0}".format(e))
-            sent=-1
+            sent="-1"
             return sent
 
 
@@ -163,6 +179,10 @@ def bing_search(srch):
 #=======================================================================================
 #end it
 #=======================================================================================
+
+#=======================================================================================
+#youtube song searching function
+#=======================================================================================
 def youtube_search(srch):
     global anna_answered
     network=is_connected()
@@ -183,17 +203,28 @@ def youtube_search(srch):
     elif network==0:
         print(AI_speaking,"Sorry I can't search anything now :/ I am not connected.")
         anna_answered=True
-        
+
+#=======================================================================================
+#end it
+#=======================================================================================
+
+#=======================================================================================
+#function to find the capital of a nation 
+#=======================================================================================        
 def capital_of(srch):
     global anna_answered
     network=is_connected()
     if network==1:
         srch=srch+" capital of"
-        result=Bing.search(srch,1,0,country_code="gb")
-       
+        result=Bing.search(srch,10,0,country_code="gb")
+        cl=0
         results=result.get('results')
+        for i in range(10):
+            if "capital-of.com/" in results[i].get('link'):
+                cl=i
+                break
         
-        req = Request(results[0].get('link'),headers={'User-Agent': 'Mozilla/5.0'})
+        req = Request(results[cl].get('link'),headers={'User-Agent': 'Mozilla/5.0'})
         stringa = urllib.request.urlopen(req).read(100000)
         code=0
 
@@ -211,15 +242,26 @@ def capital_of(srch):
                 
             else:
                 pass
+            
         if code==1:
-          print(AI_speaking,capital)
-          anna_answered=True
+          if (len(capital)>1):
+              print(AI_speaking,capital)
+              anna_answered=True
+          else:
+              print(AI_speaking,"Maybe it is not a nation cause I don't know its capital <.<")
+              anna_answered=True
         else:
           print(AI_speaking,"Maybe it is not a nation cause I don't know its capital <.<")
           anna_answered=True
     elif network==0:
         print(AI_speaking,"Sorry I can't search anything now :/ I am not connected.")
         anna_answered=True
+        
+#=======================================================================================
+#end it
+#=======================================================================================
+
+
 #=======================================================================================
 #a semplified bing search function for questions
 #=======================================================================================
@@ -252,10 +294,7 @@ def bing_search_questions(srch):
             file.close()
             
             
-
-       
-            
-        else:
+        else:                       #this may not give a correct result cause every website is different from each other
             new = soup.find_all('p')
             table=soup.find_all('td')
             for tab in table:
@@ -602,19 +641,19 @@ def reply_question(sent):
       
     
     return;
-#===========================================================================================
+#=======================================================================================
+#end it
+#=======================================================================================
+
 
 
 #============================================================================================
 
-how_are_you_array=["how are you?","what's up?","how are you doing?","how have you been?","how's it going?"]
 
-
-sentiment=0
 
 #===========================================================================================
 
-
+#generating an array of keywords for each sent
 #===========================================================================================
 def check_keywords(sentence):
     keywords=[]
@@ -633,6 +672,8 @@ def check_keywords(sentence):
 #===========================================================================================
 
 
+#===========================================================================================
+#undertanding sentiment and try to reply
 #===========================================================================================
 def output_keywords(keywords):
     
@@ -675,18 +716,18 @@ def output_keywords(keywords):
             elif sentiment==-1:
                 print(AI_speaking,random.choice(keywords_dict.get('negative answers')))
                 anna_answered=True
-       # elif w in vip_array:
-        #    if sentiment==1:
-         #       print(AI_speaking,random.choice(positive_answers))
-          #  elif sentiment==-1:
-             #   print(AI_speaking,random.choice(negative_answers))
+      
     else:
 
         core = 0
-#===========================================================================================
+#=======================================================================================
+#end it
+#=======================================================================================
 
  
-#===========================================================================================            
+#=======================================================================================
+#select the best output
+#=======================================================================================           
 def general_array_output(kw,sentiment):
     global user_speaking, anna_answered
     found=False
@@ -806,13 +847,11 @@ def general_array_output(kw,sentiment):
                 questions=questions_dict.get('tendences')
                 key_question=random.choice(list(questions.keys()))
                 array_kq=questions.get(key_question)
-               # print(AI_speaking,(random.choice(tendence_questions)%w))
                 print(AI_speaking,(key_question %w))
                 answer=input_type()
                 print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
                 anna_answered=True
             else:
-               # print(AI_speaking,random.choice(negative_tendences_questions))
                questions=questions_dict.get('negative tendences')
                key_question=random.choice(list(questions.keys()))
                print(AI_speaking,(key_question))
@@ -824,9 +863,12 @@ def general_array_output(kw,sentiment):
     file=open("questions.txt","w")
     file.write(str(questions_dict))
     file.close()
-#===========================================================================================                        
+#=======================================================================================
+#end it
+#=======================================================================================
+    
 
-
+#check user name not a function
 #===========================================================================================
 if (os.path.isfile('user_name.txt')==False):
     print(AI_speaking,"Hi I'm Anna, a virtual AI. You can talk with me for example if you don't know what to do..")
@@ -869,83 +911,98 @@ else:
     print(AI_speaking," Welcome back ",user_name,"!")
     print(AI_speaking," How are you?? :)")
     
-    
+#=======================================================================================
+#end it
+#=======================================================================================    
     
         
-
-            
+how_are_you_array=["how are you?","what's up?","how are you doing?","how have you been?","how's it going?"]
 if_not_answered=["Life is good","Life is too short","Na na Na na","Why not?","Psss, yes you..","yeah","coool","ah ah ah"]
+end_chat=["see you later","bye bye","stop chat","end chat"]
+sentiment=0
+            
+
 user_speaking=user_name+" >> "
-
-core=1
 input_mode=0
-while True:
+end=False
 
+
+while end==False:
+    anna_answered=False
     sent=input_type()
     
-    if sent=="change input type":
-        if input_mode==0:
-            input_mode=1
-            print(AI_speaking," okay, now you have to use your voice :P")
-        elif input_mode==1:
-            input_mode=0
-            print(AI_speaking," okay, now you have to type :P")
-        sent=-1
-   
-    if sent!=-1:
-        anna_answered=False
-        dep = basic_maths(sent)
-        is_question = 0
-        if (dep == 0):
-            questions(sent)
-        if (is_question == 1):
-            reply_question(sent)
-        if "want to know more about" in sent:
-            sent=sent.split('about',1) 
-            if len(sent[1])<2:
-                print(AI_speaking,"About what??")
-                srch=input_type()
-                if len(srch)<2:
-                    print(AI_speaking,"I can't search it :p")
-                    anna_answered=True
-                else:
-                    bing_search(srch)
-            else:
-                bing_search(sent[1])
-
-        elif "would like to lisen to" in sent or "want to listen to" in sent:
-            sent=sent.split('listen to',1) 
-            if len(sent[1])<2:
-                print(AI_speaking,"listen to what??")
-                srch=input_type()
-                if len(srch)<2:
-                    print(AI_speaking,"I can't search it :p")
-                    anna_answered=True
-                else:
-                    youtube_search(srch)
-            else:
-                youtube_search(sent[1])
-        
-        else:
-            input_keywords=check_keywords(sent)
-            output_keywords(input_keywords)
-            
-        if anna_answered==False:
-          check_wiki_search(sent)
-          
-          questions(sent)
-          if (is_wiki_search == 1):
-              make_wiki_search(sent)
-          elif (is_question == 1):
-              reply_question(sent)
-                      
-        if anna_answered==False:
-          
-          print (AI_speaking,random.choice(if_not_answered))
-          anna_answered=True
+    if sent in end_chat:
+        print(AI_speaking,"Bye bye :)")
+        end=True
     else:
-        pass
-          
+        if sent=="change input type":
+            network=is_connected()
+            if network==1:
+                if input_mode==0:
+                    input_mode=1
+                    print(AI_speaking," okay, now you have to use your voice :P")
+                elif input_mode==1:
+                    input_mode=0
+                    print(AI_speaking," okay, now you have to type :P")
+            else:
+                print(AI_speaking,"Sorry,you have to type cause we are offline..")
+                input_mode=0
+       
+        else:
+            
+            dep = basic_maths(sent)
+            is_question = 0
+            if (dep == 0):
+                check_wiki_search(sent)    
+            if (is_wiki_search == 1):
+                  make_wiki_search(sent)
+            else:
+                questions(sent)
+             
+            if (is_question == 1):
+                reply_question(sent)
+                
+            
+            
+            if "want to know more about" in sent :
+                sent=sent.split('about',1) 
+                if len(sent[1])<2:
+                    print(AI_speaking,"About what??")
+                    srch=input_type()
+                    if len(srch)<2:
+                        print(AI_speaking,"I can't search it :p")
+                        anna_answered=True
+                    else:
+                        bing_search(srch)
+                else:
+                    bing_search(sent[1])
+
+            elif "would like to lisen to" in sent or "want to listen to" in sent:
+                sent=sent.split('listen to',1) 
+                if len(sent[1])<2:
+                    print(AI_speaking,"listen to what??")
+                    srch=input_type()
+                    if len(srch)<2:
+                        print(AI_speaking,"I can't search it :p")
+                        anna_answered=True
+                    else:
+                        youtube_search(srch)
+                else:
+                    youtube_search(sent[1])
+            
+            
+                
+            
+              
+                          
+            if anna_answered==False:
+              input_keywords=check_keywords(sent)
+              output_keywords(input_keywords)
+              if anna_answered==False:
+    
+                  print (AI_speaking,random.choice(if_not_answered))
+                  anna_answered=True
+
 
           
 

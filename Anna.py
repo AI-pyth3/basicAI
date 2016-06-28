@@ -28,7 +28,7 @@ import re
 
 
 #=========================================================================================
-global core, network, sent, is_question, is_wiki_search
+global core, network, sent, is_question, is_wiki_search, worded, done
 AI_speaking="Anna >> "
 #=========================================================================================
 
@@ -319,6 +319,276 @@ def bing_search_questions(srch):
     
 #=======================================================================================
 #end it
+#=======================================================================================
+
+#=======================================================================================
+# Function to calculate maths using DMAS
+#=======================================================================================
+def divcheck():
+    global worded, done
+    dummy = []
+    check = 0
+    done = 0
+    countin = len(worded)
+    for i in range(0, countin):
+        if((i + 1) < countin ):
+            if (worded[i] == "/"):
+                x1 = worded[i-1]
+                x2 = worded[i+1]
+                try:
+                    x1 = float(x1)
+                    x2 = float(x2)
+                    x = x1/x2
+                    pos = i
+                    check = 1
+                except:
+                    count = 1
+                break
+    if (check == 1):
+        for i in range(0, (pos-1)):
+            word = worded[i]
+            dummy.append(word)
+        dummy.append(x)
+        for i in range((pos+2), countin):
+            word = worded[i]
+            dummy.append(word)
+        worded = [0]
+        worded = dummy
+    else:
+        for i in range(0, (len(worded))):
+            word = worded[i]
+            dummy.append(word)
+#    print (worded)
+    if (len(worded) == 1):
+        done = 1
+        return done;
+    return done;
+#=======================================================================================
+#=======================================================================================
+
+def mulcheck():
+    global worded, done
+    dummy = []
+    check = 0
+    done = 0
+    countin = len(worded)
+    for i in range(0, countin):
+        if((i + 1) < countin ):
+            if (worded[i] == "*"):
+                x1 = worded[i-1]
+                x2 = worded[i+1]
+                try:
+                    x1 = float(x1)
+                    x2 = float(x2)
+                    x = x1*x2
+                    pos = i
+                    check = 1
+                except:
+                    count = 1
+                break
+    if (check == 1):
+        for i in range(0, (pos-1)):
+            word = worded[i]
+            dummy.append(word)
+        dummy.append(x)
+        for i in range((pos+2), countin):
+            word = worded[i]
+            dummy.append(word)
+        worded = [0]
+        worded = dummy
+    else:
+        for i in range(0, (len(worded))):
+            word = worded[i]
+            dummy.append(word)
+#    print (worded)
+    if (len(worded) == 1):
+        done = 1
+        return done;
+    return done;
+#=======================================================================================
+#=======================================================================================
+
+def addcheck():
+    global worded, done
+    dummy = []
+    check = 0
+    done = 0
+    countin = len(worded)
+    for i in range(0, countin):
+        if((i + 1) < countin ):
+            if (worded[i] == "+"):
+                x1 = worded[i-1]
+                x2 = worded[i+1]
+                try:
+                    x1 = float(x1)
+                    x2 = float(x2)
+                    x = x1+x2
+                    pos = i
+                    check = 1
+                except:
+                    count = 1
+                break
+    if (check == 1):
+        for i in range(0, (pos-1)):
+            word = worded[i]
+            dummy.append(word)
+        dummy.append(x)
+        for i in range((pos+2), countin):
+            word = worded[i]
+            dummy.append(word)
+        worded = [0]
+        worded = dummy
+    else:
+        for i in range(0, (len(worded))):
+            word = worded[i]
+            dummy.append(word)
+    y = 0
+    dummy = []
+    word = worded[0]
+    dummy.append(word)
+    for i in range(1, (len(worded))):
+        if (worded[i] == "+"):
+            word = worded[i]
+            dummy.append(word)
+            word = worded[i+1]
+            dummy.append(word)
+    for i in range(1, (len(worded))):
+        if (worded[i] == "-"):
+            word = worded[i]
+            dummy.append(word)
+            word = worded[i+1]
+            dummy.append(word)
+    worded = dummy
+#    print (worded)
+    if (len(worded) == 1):
+        done = 1
+        return done;
+    return done;
+#=======================================================================================
+#=======================================================================================
+
+def subcheck():
+    global worded, done
+    dummy = []
+    check = 0
+    done = 0
+    countin = len(worded)
+    for i in range(0, countin):
+        if((i + 1) < countin ):
+            if (worded[i] == "-"):
+                x1 = worded[i-1]
+                x2 = worded[i+1]
+                try:
+                    x1 = float(x1)
+                    x2 = float(x2)
+                    x = x1-x2
+                    pos = i
+                    check = 1
+                except:
+                    count = 1
+                break
+    if (check == 1):
+        for i in range(0, (pos-1)):
+            word = worded[i]
+            dummy.append(word)
+        dummy.append(x)
+        for i in range((pos+2), countin):
+            word = worded[i]
+            dummy.append(word)
+        worded = [0]
+        worded = dummy
+    else:
+        for i in range(0, (len(worded))):
+            word = worded[i]
+            dummy.append(word)
+#    print (worded)
+    if (len(worded) == 1):
+        done = 1
+        return done;
+    return done;
+#=======================================================================================
+# End of all calculating Functions
+#=======================================================================================
+
+
+#=======================================================================================
+# Actual Check Function For DMAS
+#=======================================================================================
+def dmas_check(checker):
+    global worded, done, anna_answered
+    AI_speaking="Anna >> "
+    dummy1 = []
+    check_done = 0
+    inpop = checker
+    pos = 0
+    operators=["+","-","/","*"]
+    inpop = inpop.replace(' ', '')
+    i=0
+    c=0
+    result=[]
+    worded = list(inpop)
+    countin = len(worded)
+    for i in range(0, countin):
+        try:
+            x1 = worded[i]
+            x1 = float(x1)
+            pos = i
+            break
+        except:
+            count = 1
+    inpop = inpop[pos:countin]
+    while i<len(inpop):
+        if inpop[i]in operators:
+             result.append(inpop[c:i])
+             result.append(inpop[i])
+             c=i+1
+        i+=1
+    result.append(inpop[c:i])
+    worded = result
+    dummy1 = worded
+    for i in range(0, countin):
+        for j in range(0, countin):
+            try:
+                if (dummy1[j] == "/"):
+                    check_done = divcheck()
+                    dummy1 = worded
+            except:
+                count = 1
+    dummy1 = worded
+    if (check_done != 1):
+        for i in range(0, countin):
+            for j in range(0, countin):
+                try:
+                    if (dummy1[j] == "*"):
+                        check_done = mulcheck()
+                        dummy1 = worded
+                except:
+                    count = 1
+    dummy1 = worded
+    if (check_done != 1):
+        for i in range(0, countin):
+            for j in range(0, countin):
+                try:
+                    if (dummy1[j] == "+"):
+                        check_done = addcheck()
+                        dummy1 = worded
+                except:
+                    count = 1
+    dummy1 = worded
+    if (check_done != 1):
+        for i in range(0, countin):
+            for j in range(0, countin):
+                try:
+                    if (dummy1[j] == "-"):
+                        check_done = subcheck()
+                        dummy1 = worded
+                except:
+                    count = 1
+    if (check_done == 1):
+        print (AI_speaking,"answer is : ",worded[0])
+    return;
+#=======================================================================================
+#End of this Function
 #=======================================================================================
 
 #=======================================================================================
@@ -949,8 +1219,11 @@ while end==False:
                 input_mode=0
        
         else:
-            
+            dmas = 0
             dep = basic_maths(sent)
+            if (dep == 0):
+                checker = sent
+                dmas = dmas_check(checker)
             is_question = 0
             if (dep == 0):
                 check_wiki_search(sent)    

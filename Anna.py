@@ -1221,6 +1221,7 @@ while end==False:
         else:
             dmas = 0
             dep = basic_maths(sent)
+            is_wiki_search = 0
             if (dep == 0):
                 checker = sent
                 dmas = dmas_check(checker)

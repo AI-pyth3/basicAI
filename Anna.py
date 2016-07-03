@@ -1,14 +1,15 @@
 #=========================================================================================
-#AI_version = 1.0.0
+#AI_version = 1.1.1
 #AI_name = Anna
 #=========================================================================================
-
 
 #=========================================================================================
 from textblob import TextBlob
 from bs4 import BeautifulSoup
 from urllib.request import Request
 from pws import Bing
+from pygame import mixer 
+from gt import gTTS
 #=========================================================================================
 
 
@@ -22,7 +23,7 @@ import os
 import speech_recognition as sr
 import urllib.parse
 import re
-
+import time
 
 #=========================================================================================
 
@@ -31,7 +32,6 @@ import re
 global core, network, sent, is_question, is_wiki_search, worded, done
 AI_speaking="Anna >> "
 #=========================================================================================
-
 
 #=========================================================================================
 REMOTE_SERVER =     "www.google.com"
@@ -97,7 +97,7 @@ def input_type():
     if input_mode==0:
         
             sent=input(user_speaking).lower()
-            if sent.isspace():
+            if sent.isspace()or len(sent)==0:
                 print(AI_speaking,"Please say something of correct")
                 anna_answered=True
                 sent="-1"
@@ -129,7 +129,27 @@ def input_type():
 #=======================================================================================
 #end it
 #=======================================================================================
-
+#=======================================================================================
+#bing search function
+#=======================================================================================
+def audio_output(srch):
+    sentence=srch
+    audio_file = "output.mp3"
+    for ch in srch:
+        if ch in [":","(",")","[","]","<"]:
+           srch=srch.replace(ch," ")
+    try:
+        tts = gTTS(text=srch, lang="en")
+        tts.save(audio_file)
+        mixer.init()
+        mixer.music.load('output.mp3')
+        mixer.music.play()
+        while mixer.music.get_busy()==True:
+         pass
+    except:
+        pass
+    print(AI_speaking,sentence)
+    
 #=======================================================================================
 #bing search function
 #=======================================================================================
@@ -149,11 +169,11 @@ def bing_search(srch):
             
             code+=1
             
-        print(AI_speaking,"Do you want to open one of the previuos link?")
+        audio_output("Do you want to open one of the previuos link?")
         openit=input_type()
         
         if (openit=="yes"):
-            print(AI_speaking,"Tell me the code of the link you want to open :) ")
+            audio_output("Tell me the code of the link you want to open :) ")
             ch_code=input_type()
             try:
                 ch_code=int(ch_code)
@@ -164,21 +184,22 @@ def bing_search(srch):
                 results=result.get('results')
                 link_to_open=results[ch_code-1].get('link')
                 webbrowser.open_new(link_to_open)
-                print(AI_speaking,"Here you are :)")
+                audio_output("Here you are :)")
                 anna_answered=True
             else:
-                print(AI_speaking,"This is not a valid code :(")
+                audio_output("This is not a valid code :(")
                 anna_answered=True
                 
         else:
-            print(AI_speaking,"Oh ok :)")
+            audio_output("Oh ok :)")
             anna_answered=True
     elif network==0:
-        print(AI_speaking,"Sorry I can't search anything now :/ I am not connected.")
+        audio_output("Sorry I can't search anything now :/ I am not connected.")
         anna_answered=True
 #=======================================================================================
 #end it
 #=======================================================================================
+
 
 #=======================================================================================
 #youtube song searching function
@@ -191,17 +212,17 @@ def youtube_search(srch):
         html_content = urllib.request.urlopen("http://www.youtube.com/results?" + query_string)
         search_results = re.findall(r'href=\"\/watch\?v=(.{11})', html_content.read().decode())
         link="http://www.youtube.com/watch?v=" + search_results[0]
-        print(AI_speaking,"Do you want to open ", srch," in a web browser?")
+        audio_output("Do you want to open "+ srch+" in a web browser?")
         openit=input_type()
         if openit=="yes":
             webbrowser.open_new(link)
             anna_answered=True
         else:
-            print(AI_speaking,"Oh ok..")
+            audio_output("Oh ok..")
             anna_answered=True
         
     elif network==0:
-        print(AI_speaking,"Sorry I can't search anything now :/ I am not connected.")
+        audio_output("Sorry I can't search anything now :/ I am not connected.")
         anna_answered=True
 
 #=======================================================================================
@@ -245,16 +266,16 @@ def capital_of(srch):
             
         if code==1:
           if (len(capital)>1):
-              print(AI_speaking,capital)
+              audio_output(capital)
               anna_answered=True
           else:
-              print(AI_speaking,"Maybe it is not a nation cause I don't know its capital <.<")
+              audio_output("Maybe it is not a nation cause I don't know its capital <.<")
               anna_answered=True
         else:
-          print(AI_speaking,"Maybe it is not a nation cause I don't know its capital <.<")
+          audio_output("Maybe it is not a nation cause I don't know its capital <.<")
           anna_answered=True
     elif network==0:
-        print(AI_speaking,"Sorry I can't search anything now :/ I am not connected.")
+        audio_output("Sorry I can't search anything now :/ I am not connected.")
         anna_answered=True
         
 #=======================================================================================
@@ -286,7 +307,7 @@ def bing_search_questions(srch):
         if('wikipedia' in link):
             txt=soup.find('div',id="bodyContent")
             answer_is=txt.find('p').getText()
-            print (AI_speaking,answer_is )
+            print(AI_speaking,answer_is )
             anna_answered=True
             wh_answered[initial_sentence]=answer_is
             file=open("wh_already_answered.txt","w")
@@ -295,25 +316,11 @@ def bing_search_questions(srch):
             
             
         else:                       #this may not give a correct result cause every website is different from each other
-            new = soup.find_all('p')
-            table=soup.find_all('td')
-            for tab in table:
-                if new[pos] in tab:
-                   
-                    pos=pos+1
-            try:
-                ln=len(new[pos].getText())
-                if (ln<30):
-                    print(AI_speaking,new[pos].getText().replace('\n',' '))
-                    print(AI_speaking,new[pos+1].getText().replace('\n',' '))
-                    anna_answered=True
-                else:
-                    print(new[pos].getText())
-            except IndexError:
-                    print(AI_speaking,"I have found nothing")
-                    anna_answered=True
+          anna_answered=False
+          print("ciao")
+              
     elif network==0:
-        print(AI_speaking,"Sorry I can't search anything now :/ I am not connected.")
+        audio_output("Sorry I can't search anything now :/ I am not connected.")
         anna_answered=True
     
     
@@ -515,6 +522,7 @@ def subcheck():
 # Actual Check Function For DMAS
 #=======================================================================================
 def dmas_check(checker):
+    global anna_answered
     global worded, done, anna_answered
     AI_speaking="Anna >> "
     dummy1 = []
@@ -585,7 +593,8 @@ def dmas_check(checker):
                 except:
                     count = 1
     if (check_done == 1):
-        print (AI_speaking,"answer is : ",worded[0])
+        paudio_output("answer is : "+worded[0])
+        anna_answered=True
     return;
 #=======================================================================================
 #End of this Function
@@ -631,7 +640,7 @@ def basic_maths(sent):
             checkdup = checkdup + 1
             checkdiv = 1
     if (checkdup == 1) and (countin == 1):
-        print (AI_speaking," but what should I", words[0])
+        audio_output(" but what should I", words[0])
         a = input("Enter first no. : ")
         b = input("Enter second no. : ")
         words.append(a)
@@ -664,7 +673,7 @@ def basic_maths(sent):
         if (check == 1):
             for i in range(0, count):
                 addit = addit + dig[i]
-            print (AI_speaking,"answer is :", addit )
+            audio_output("answer is :"+ addit )
             anna_answered=True
             check_maths = 1
             return check_maths;
@@ -672,7 +681,7 @@ def basic_maths(sent):
             addit = 1
             for i in range(0, count):
                 addit = addit * dig[i]
-            print (AI_speaking," answer is :", addit )
+            audio_output(" answer is :"+ addit )
             anna_answered=True
             check_maths = 1
             return check_maths;
@@ -684,17 +693,17 @@ def basic_maths(sent):
                     addit = addit - dig[i]
             else:
                 addit = dig[1] - dig [0]
-            print (AI_speaking," answer is :", addit )
+            audio_output(" answer is :"+ addit )
             anna_answered=True
             check_maths = 1
             return check_maths;
         if (check == 4):
             if (dig[1] == 0):
-                print (AI_speaking," division by zero not possible")
+                audio_output(" division by zero not possible")
                 anna_answered=True
             else:
                 addit = dig[0]/dig[1]
-                print (AI_speaking," answer is :", addit )
+                audio_output(" answer is :"+addit)
                 anna_answered=True
             check_maths = 1
             return check_maths;
@@ -745,20 +754,21 @@ def make_wiki_search(sent):
         if (search == 1) and (words[count + 1] != "fixforsearch"):
           newword = words[count + 1]
           print ("\n")
-          print (wikipedia.summary(newword))
+          print(AI_speaking,wikipedia.summary(newword))
         elif (search == 1):
-          print("OK, but what should I search?")
+          audio_output("OK, but what should I search?")
           newword = input_type()
           print ("\n")
-          print (wikipedia.summary(newword))
+          print(AI_speaking,wikipedia.summary(newword))
           
         else:
           return;
-        print("\n\n",AI_speaking,"Hope you got the answer")
+        print("\n\n",)
+        audio_output("Hope you got the answer")
         anna_answered=True
         return;
     elif network==0:
-        print(AI_speaking,"Sorry I can't search anything now :/ I am not connected.")
+        audio_output("Sorry I can't search anything now :/ I am not connected.")
         anna_answered=True
 #=========================================================================================
 #end
@@ -817,7 +827,7 @@ def reply_question(sent):
             status=1
 
     if sent in list(general_questions.keys()):
-        print(AI_speaking,general_questions.get(sent))
+        audio_output(general_questions.get(sent))
         
         status=1
 
@@ -837,7 +847,7 @@ def reply_question(sent):
         if ('you' in sent or 'your' in sent):
             for keyword in ["god","prayer","pray"]:
                 if keyword in sent:
-                    print(AI_speaking,random.choice(answer_tq_nokw_dict.get('about God')))
+                    audio_output(random.choice(answer_tq_nokw_dict.get('about God')))
                     status=1
                     break
             
@@ -845,7 +855,7 @@ def reply_question(sent):
         if ('you' in sent or 'your' in sent):
             for keyword in keywords_dict.get('family') :
                 if keyword in sent:
-                    print(AI_speaking,random.choice(answer_tq_nokw_dict.get('about family')))
+                    audio_output(random.choice(answer_tq_nokw_dict.get('about family')))
                     status=1
                     break
 
@@ -853,7 +863,7 @@ def reply_question(sent):
         if ('you' in sent or 'your' in sent):
             for keyword in ['music','song','singer','band']:
                 if keyword in sent:
-                    print(AI_speaking,random.choice(answer_tq_nokw_dict.get('about music')))
+                    audio_output(random.choice(answer_tq_nokw_dict.get('about music')))
                     status=1
                     break
 
@@ -863,7 +873,7 @@ def reply_question(sent):
                 answerkw_list=list(answer_to_question_dict.keys())
                 for keyword in keywords_question:
                     if keyword in answerkw_list:
-                        print(AI_speaking,random.choice(answer_to_question_dict.get(keyword)))
+                        audio_output(random.choice(answer_to_question_dict.get(keyword)))
                         status=1
                         break
                 
@@ -873,7 +883,7 @@ def reply_question(sent):
     if status==0:
         for keyword in keywords_question:
             if keyword in keywords_dict.get("feelings") or "think about" in sent:
-                print(AI_speaking,random.choice(like_general_answers))
+                audio_output(random.choice(like_general_answers))
                 status=1
                 break
             
@@ -883,8 +893,10 @@ def reply_question(sent):
        
         if (tag[0][1] in wh_starts and 'you' not in sent):
             
-            bing_search_questions(sent)
-            status=1
+             if anna_answered==True:
+                 status=1
+             else:
+                 status=0
 
     if status==0:
         if sent.startswith("do you know")==True:
@@ -892,14 +904,17 @@ def reply_question(sent):
             sent=sent[1]
             tbsent=TextBlob(sent)
             tag=tbsent.tags
-       
+            
             if (tag[0][1] in wh_starts and 'you' not in sent):
             
                bing_search_questions(sent)
-               status=1
+               if anna_answered==True:
+                 status=1
+               else:
+                 status=0
 
     if status==0:
-        print(AI_speaking,random.choice(general_answers))
+        audio_output(random.choice(general_answers))
         status=1
         
     if status==1:
@@ -951,15 +966,15 @@ def output_keywords(keywords):
     if (len(keywords)!=0):
         w=keywords[0]
         if w in keywords_dict.get("regards"):
-            print(AI_speaking,random.choice(how_are_you_array))
+            audio_output(random.choice(how_are_you_array))
             anna_answered=True
         elif w in keywords_dict.get("hwy positive"):
-            print(AI_speaking,"This is cool! I'm always fine (for now)")
-            print(AI_speaking,"Tell me something you like for example ")
+            audio_output("This is cool! I'm always fine (for now)")
+            audio_output("Tell me something you like for example ")
             anna_answered=True
         elif w in keywords_dict.get("hwy negative"):
-            print("Come'on everythings will be good!")
-            print(AI_speaking,"Tell me something new ")
+            audio_output("Come'on everythings will be good!")
+            audio_output("Tell me something new ")
             anna_answered=True
             
         elif w in keywords_dict.get("negative"):
@@ -981,10 +996,10 @@ def output_keywords(keywords):
             general_array_output(keywords,sentiment)
         else:
             if sentiment==1:
-                print(AI_speaking,random.choice(keywords_dict.get('positive answers')))
+                audio_output(random.choice(keywords_dict.get('positive answers')))
                 anna_answered=True
             elif sentiment==-1:
-                print(AI_speaking,random.choice(keywords_dict.get('negative answers')))
+                audio_output(random.choice(keywords_dict.get('negative answers')))
                 anna_answered=True
       
     else:
@@ -1014,13 +1029,13 @@ def general_array_output(kw,sentiment):
                 array_kq=questions.get(key_question)
                 
                 if array_kq[0]==0:
-                    print(AI_speaking,(key_question %w))
+                    audio_output((key_question %w))
                     answer=input_type()
                     questions_dict['team sports'][key_question].append({w:answer})
                     array_kq[0]=1
                     
                     
-                    print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
+                    audio_output((random.choice(keywords_dict.get('positive answers'))))
                     anna_answered=True
                 
                 elif array_kq[0]==1:
@@ -1029,25 +1044,25 @@ def general_array_output(kw,sentiment):
                             sport=list(saved_ans.keys())
                             
                             if sport[0]==w:
-                                print(AI_speaking,"I know, I asked you'",(key_question %w),"' and you said '",saved_ans.get(sport[0]),"'")
+                                audio_output("I know, I asked you'"+(key_question %w)+"' and you said '"+saved_ans.get(sport[0])+"'")
                                 anna_answered=True
                                 found=True
                                 break
                     
                     if found==False:
-                        print(AI_speaking,(key_question %w))
+                        audio_output((key_question %w))
                         answer=input_type()
                         questions_dict['team sports'][key_question].append({w:answer})
                         array_kq[0]=1
                         pos=keywords_dict.get('positive answers')
                         
-                        print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
-                        print(questions_dict)
+                        audio_output((random.choice(keywords_dict.get('positive answers'))))
+                        audio_output(questions_dict)
                         anna_answered=True
                 else:
-                    print(AI_speaking,(key_question %w))
+                    audio_output((key_question %w))
                     answer=input_type()
-                    print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
+                    audio_output((random.choice(keywords_dict.get('positive answers'))))
                     anna_answered=True
                     
                 
@@ -1055,9 +1070,9 @@ def general_array_output(kw,sentiment):
                # print(AI_speaking,random.choice(negative_sport_questions))
                 questions=questions_dict.get('negative sports')
                 key_question=random.choice(list(questions.keys()))
-                print(AI_speaking,(key_question))
+                audio_output((key_question))
                 answer=input_type()
-                print(AI_speaking,(random.choice(keywords_dict.get('negative answers'))))
+                audio_output((random.choice(keywords_dict.get('negative answers'))))
                 anna_answered=True
 
                 
@@ -1068,13 +1083,13 @@ def general_array_output(kw,sentiment):
                 array_kq=questions.get(key_question)
                 
                 if array_kq[0]==0:
-                    print(AI_speaking,(key_question %w))
+                    audio_output((key_question %w))
                     answer=input_type()
                     questions_dict['single sports'][key_question].append({w:answer})
                     array_kq[0]=1
                     
                     
-                    print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
+                    audio_output(random.choice(keywords_dict.get('positive answers')))
                     anna_answered=True
                 
                 elif array_kq[0]==1:
@@ -1083,33 +1098,33 @@ def general_array_output(kw,sentiment):
                             sport=list(saved_ans.keys())
                             
                             if sport[0]==w:
-                                print(AI_speaking,"I know, I asked you'",(key_question %w),"' and you said '",saved_ans.get(sport[0]),"'")
+                                audio_output("I know, I asked you'"+(key_question %w)+"' and you said '"+saved_ans.get(sport[0])+"'")
                                 anna_answered=True
                                 found=True
                                 break
                     
                     if found==False:
-                        print(AI_speaking,(key_question %w))
+                        audio_output((key_question %w))
                         answer=input_type()
                         questions_dict['team sports'][key_question].append({w:answer})
                         array_kq[0]=1
                         pos=keywords_dict.get('positive answers')
                         
-                        print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
+                        audio_output((random.choice(keywords_dict.get('positive answers'))))
                         
                         anna_answered=True
                 else:
-                    print(AI_speaking,(key_question %w))
+                    audio_output((key_question %w))
                     answer=input_type()
-                    print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
+                    audio_output((random.choice(keywords_dict.get('positive answers'))))
                     anna_answered=True
 
             else:
                 questions=questions_dict.get('negative sports')
                 key_question=random.choice(list(questions.keys()))
-                print(AI_speaking,(key_question))
+                audio_output((key_question))
                 answer=input_type()
-                print(AI_speaking,(random.choice(keywords_dict.get('negative answers'))))
+                audio_output((random.choice(keywords_dict.get('negative answers'))))
                 anna_answered=True
                 
         if w in keywords_dict.get('tendences'):
@@ -1117,16 +1132,16 @@ def general_array_output(kw,sentiment):
                 questions=questions_dict.get('tendences')
                 key_question=random.choice(list(questions.keys()))
                 array_kq=questions.get(key_question)
-                print(AI_speaking,(key_question %w))
+                audio_output((key_question %w))
                 answer=input_type()
-                print(AI_speaking,(random.choice(keywords_dict.get('positive answers'))))
+                audio_output(random.choice(keywords_dict.get('positive answers')))
                 anna_answered=True
             else:
                questions=questions_dict.get('negative tendences')
                key_question=random.choice(list(questions.keys()))
-               print(AI_speaking,(key_question))
+               audio_output(key_question)
                answer=input_type()
-               print(AI_speaking,(random.choice(keywords_dict.get('negative answers'))))
+               audio_output((random.choice(keywords_dict.get('negative answers'))))
                anna_answered=True
         
                 
@@ -1141,11 +1156,12 @@ def general_array_output(kw,sentiment):
 #check user name not a function
 #===========================================================================================
 if (os.path.isfile('user_name.txt')==False):
-    print(AI_speaking,"Hi I'm Anna, a virtual AI. You can talk with me for example if you don't know what to do..")
-    print(AI_speaking,"But first of all I need to know your name..")
+    audio_output("Hi I'm Anna, an artificial intelligence. You can talk with me for example if you don't know what to do..")
+    audio_output("But first of all I need to know your name..")
     it_is_a_name=False
     while it_is_a_name==False:
-        pos_name=input("So what's your name? : ").title()
+        audio_output("So what is your name? ")
+        pos_name=input().title()
         pos_name=TextBlob(pos_name)
         nnp=False
         for tag in pos_name.tags:
@@ -1157,7 +1173,7 @@ if (os.path.isfile('user_name.txt')==False):
             if nnp==False:
                 if  tag[1]== 'NN':
                     user_name=tag[0]
-                    print(AI_speaking,random.choice(keywords_dict.get('regards'))," ",user_name)
+                    audio_output(random.choice(keywords_dict.get('regards'))+" "+user_name)
                     file=open('user_name.txt','a')
                     file.write(user_name)
                     file.close()
@@ -1165,21 +1181,23 @@ if (os.path.isfile('user_name.txt')==False):
             if nnp==True:
                 if tag[1]=='NNP':
                     user_name=tag[0]
-                    print(AI_speaking,random.choice(keywords_dict.get('regards'))," ",user_name)
+                    audio_output(random.choice(keywords_dict.get('regards'))+" "+user_name)
                     file=open('user_name.txt','a')
                     file.write(user_name)
                     file.close()
                     it_is_a_name=True
                     
         if it_is_a_name==False:
-            print(AI_speaking,"This can't be your name! Are you already kidding me??? >.>")
+            audio_output("This can't be your name! Are you already kidding me??? >.>")
 
 else:
     file=open('user_name.txt','r')
     user_name=file.read()
     file.close()
-    print(AI_speaking," Welcome back ",user_name,"!")
-    print(AI_speaking," How are you?? :)")
+    audio_output(" Welcome back "+user_name+"!")
+    pass
+    audio_output(" How are you?? :)")
+
     
 #=======================================================================================
 #end it
@@ -1188,7 +1206,7 @@ else:
         
 how_are_you_array=["how are you?","what's up?","how are you doing?","how have you been?","how's it going?"]
 if_not_answered=["Life is good","Life is too short","Na na Na na","Why not?","Psss, yes you..","yeah","coool","ah ah ah"]
-end_chat=["see you later","bye bye","stop chat","end chat"]
+end_chat=["see you later","bye bye","stop chat","end chat","bye"]
 sentiment=0
             
 
@@ -1202,7 +1220,7 @@ while end==False:
     sent=input_type()
     
     if sent in end_chat:
-        print(AI_speaking,"Bye bye :)")
+        audio_output("Bye bye :)")
         end=True
     else:
         if sent=="change input type":
@@ -1210,12 +1228,12 @@ while end==False:
             if network==1:
                 if input_mode==0:
                     input_mode=1
-                    print(AI_speaking," okay, now you have to use your voice :P")
+                    audio_output(" okay, now you have to use your voice :P")
                 elif input_mode==1:
                     input_mode=0
-                    print(AI_speaking," okay, now you have to type :P")
+                    audio_output(" okay, now you have to type :P")
             else:
-                print(AI_speaking,"Sorry,you have to type cause we are offline..")
+                audio_output("Sorry,you have to type cause we are offline..")
                 input_mode=0
        
         else:
@@ -1241,10 +1259,10 @@ while end==False:
             if "want to know more about" in sent :
                 sent=sent.split('about',1) 
                 if len(sent[1])<2:
-                    print(AI_speaking,"About what??")
+                    audio_output("About what??")
                     srch=input_type()
                     if len(srch)<2:
-                        print(AI_speaking,"I can't search it :p")
+                        audio_output("I can't search it :p")
                         anna_answered=True
                     else:
                         bing_search(srch)
@@ -1254,10 +1272,10 @@ while end==False:
             elif "would like to lisen to" in sent or "want to listen to" in sent:
                 sent=sent.split('listen to',1) 
                 if len(sent[1])<2:
-                    print(AI_speaking,"listen to what??")
+                    audio_output("listen to what??")
                     srch=input_type()
                     if len(srch)<2:
-                        print(AI_speaking,"I can't search it :p")
+                        audio_output("I can't search it :p")
                         anna_answered=True
                     else:
                         youtube_search(srch)
@@ -1274,7 +1292,7 @@ while end==False:
               output_keywords(input_keywords)
               if anna_answered==False:
     
-                  print (AI_speaking,random.choice(if_not_answered))
+                  print(AI_speaking,random.choice(if_not_answered))
                   anna_answered=True
 
 

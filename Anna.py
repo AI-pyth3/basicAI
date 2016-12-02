@@ -112,7 +112,7 @@ def input_type():
             print(user_speaking, end=' ')
             audio = r.listen(source)
         try:
-            sent=r.recognize_google(audio,key="AIzaSyCQxkevHmo0caLeAvxMnUXv1TNSOi2oxdE")
+            sent=r.recognize_google(audio,key="*******ask for it*****")
             print(sent)
             return sent
         except sr.UnknownValueError:

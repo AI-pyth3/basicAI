@@ -743,15 +743,23 @@ def make_wiki_search(sent):
           count = count + 1
 
         if (search == 1) and (words[count + 1] != "fixforsearch"):
-          newword = words[count + 1]
+          if (words[count+1] == "about") or (words[count+1] == "for"):
+            newword = words[count + 2]
+          else:
+            newword = words[count + 1]
           print ("\n")
-          print (wikipedia.summary(newword))
+          try:
+            print (wikipedia.summary(newword))
+          except:
+            print (AI_speaking,"Inconsistent search!")
         elif (search == 1):
           print("OK, but what should I search?")
           newword = input_type()
           print ("\n")
-          print (wikipedia.summary(newword))
-          
+          try:
+            print (wikipedia.summary(newword))          
+          except:
+            print (AI_speaking,"Inconsistent search!")
         else:
           return;
         print("\n\n",AI_speaking,"Hope you got the answer")
@@ -1225,6 +1233,7 @@ while end==False:
             if (dep == 0):
                 checker = sent
                 dmas = dmas_check(checker)
+                anna_answered = True
             is_question = 0
             if (dep == 0):
                 check_wiki_search(sent)    

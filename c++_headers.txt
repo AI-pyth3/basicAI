@@ -1,0 +1,21 @@
+//This file consits of possible headers that can be required while ewriting a code. 
+
+//Every header requirement is listed with the header name to be included. I plan too make it dynamic later so that Anna can herself add up the headers she learn while our venture continues.
+
+//Eg. : is_maths_required -> math.h
+
+//list : 
+
+is_input_output_stream -> iostream
+
+is_file_open_close -> fstream
+
+is_maths -> math.h
+
+needs_string -> string.h
+
+is_input_output_pointer -> stdio.h
+
+is_time_needed -> time.h
+
+is_random_required -> random.h

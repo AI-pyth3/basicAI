@@ -586,6 +586,7 @@ def dmas_check(checker):
                     count = 1
     if (check_done == 1):
         print (AI_speaking,"answer is : ",worded[0])
+        anna_answered = True
     return;
 #=======================================================================================
 #End of this Function
@@ -1237,7 +1238,6 @@ while end==False:
             if (dep == 0):
                 checker = sent
                 dmas = dmas_check(checker)
-                anna_answered = True
             is_question = 0
             if (dep == 0):
                 check_wiki_search(sent)    

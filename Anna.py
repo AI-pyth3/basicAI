@@ -744,7 +744,11 @@ def make_wiki_search(sent):
 
         if (search == 1) and (words[count + 1] != "fixforsearch"):
           if (words[count+1] == "about") or (words[count+1] == "for"):
-            newword = words[count + 2]
+            if (words[count + 2] != "fixforsearch"):
+              newword = words[count + 2]
+            elif (words[count + 2] == "fixforsearch"):
+              print("OK, but what should I search?")
+              newword = input_type()
           else:
             newword = words[count + 1]
           print ("\n")
